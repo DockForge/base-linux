@@ -14,7 +14,8 @@ RUN case ${TARGETPLATFORM} in \
       "linux/arm64") ARCH="aarch64";; \
       "linux/s390x") ARCH="s390x";; \
       *) echo "Unsupported platform"; exit 1;; \
-    esac
+    esac && \
+    echo "Architecture set to: ${ARCH}"
 
 ENV ARCH=${ARCH}
 
@@ -68,7 +69,6 @@ ARG MODS_VERSION="v3"
 ARG PKG_INST_VERSION="v1"
 LABEL build_version="DockForge version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="Dublok"
-
 
 # copy mod scripts from assets directory
 COPY assets/mod-scripts/docker-mods.${MODS_VERSION}.sh /docker-mods
