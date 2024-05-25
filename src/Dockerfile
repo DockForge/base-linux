@@ -7,13 +7,13 @@ ENV ROOTFS=/root-out
 ENV REL=v3.20
 
 # build argument for architecture
-ARG TARGETPLATFORM
-RUN echo "Building for platform: ${TARGETPLATFORM}"
-RUN case ${TARGETPLATFORM} in \
-      "linux/amd64") ARCH="x86_64";; \
-      "linux/arm64") ARCH="aarch64";; \
-      "linux/s390x") ARCH="s390x";; \
-      *) echo "Unsupported platform"; exit 1;; \
+ARG TARGETARCH
+RUN echo "Building for architecture: ${TARGETARCH}"
+RUN case ${TARGETARCH} in \
+      "amd64") ARCH="x86_64";; \
+      "arm64") ARCH="aarch64";; \
+      "s390x") ARCH="s390x";; \
+      *) echo "Unsupported architecture"; exit 1;; \
     esac && \
     echo "Architecture set to: ${ARCH}"
 
