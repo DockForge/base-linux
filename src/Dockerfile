@@ -27,20 +27,16 @@ busybox,\
 libc-utils
 
 # install packages
-RUN \
-  apk add --no-cache \
-    bash \
-    xz
+RUN apk add --no-cache bash xz
 
 # build rootfs
-RUN \
-  mkdir -p "$ROOTFS/etc/apk" && \
-  { \
-    echo "$MIRROR/$REL/main"; \
-    echo "$MIRROR/$REL/community"; \
-  } > "$ROOTFS/etc/apk/repositories" && \
-  apk --root "$ROOTFS" --no-cache --keys-dir /etc/apk/keys add --arch $ARCH --initdb ${PACKAGES//,/ } && \
-  sed -i -e 's/^root::/root:!:/' /root-out/etc/shadow
+RUN mkdir -p "$ROOTFS/etc/apk" && \
+    { \
+        echo "$MIRROR/$REL/main"; \
+        echo "$MIRROR/$REL/community"; \
+    } > "$ROOTFS/etc/apk/repositories" && \
+    apk --root "$ROOTFS" --no-cache --keys-dir /etc/apk/keys add --arch $ARCH --initdb ${PACKAGES//,/ } && \
+    sed -i -e 's/^root::/root:!:/' /root-out/etc/shadow
 
 # set version for s6 overlay
 ARG S6_OVERLAY_VERSION="v3.1.6.2"
@@ -50,7 +46,7 @@ ARG S6_OVERLAY_ARCH=${ARCH}
 COPY assets/s6-overlay/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz
 COPY assets/s6-overlay/s6-overlay-${S6_OVERLAY_ARCH}-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-${S6_OVERLAY_ARCH}-${S6_OVERLAY_VERSION}.tar.xz
 COPY assets/s6-overlay/s6-overlay-symlinks-noarch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-noarch-${S6_OVERLAY_VERSION}.tar.xz
-COPY assets/s6-overlay/s6-overlay-symlinks-arch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-arch-${S6_OVERLAY_VERSION}.tar.xz
+COPY assets/s6-overlay/s6-overlay-symlinks-arch-${S6_OVERLAY_ARCH}-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-arch-${S6_OVERLAY_VERSION}.tar.xz
 
 # add s6 overlay
 RUN tar -C /root-out -Jxpf /tmp/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz
@@ -80,41 +76,39 @@ RUN chmod 744 /docker-mods && \
 
 # environment variables
 ENV PS1="$(whoami)@$(hostname):$(pwd)\\$ " \
-  HOME="/root" \
-  TERM="xterm" \
-  S6_CMD_WAIT_FOR_SERVICES_MAXTIME="0" \
-  S6_VERBOSITY=1 \
-  S6_STAGE2_HOOK=/docker-mods \
-  VIRTUAL_ENV=/dockforgeopy \
-  PATH="/dockforgeopy/bin:$PATH"
+    HOME="/root" \
+    TERM="xterm" \
+    S6_CMD_WAIT_FOR_SERVICES_MAXTIME="0" \
+    S6_VERBOSITY=1 \
+    S6_STAGE2_HOOK=/docker-mods \
+    VIRTUAL_ENV=/dockforgeopy \
+    PATH="/dockforgeopy/bin:$PATH"
 
-RUN \
-  echo "**** install runtime packages ****" && \
-  apk add --no-cache \
-    alpine-release \
-    bash \
-    ca-certificates \
-    catatonit \
-    coreutils \
-    curl \
-    findutils \
-    jq \
-    netcat-openbsd \
-    procps-ng \
-    shadow \
-    tzdata && \
-  echo "**** create abc user and make our folders ****" && \
-  groupmod -g 1000 users && \
-  useradd -u 911 -U -d /config -s /bin/false abc && \
-  usermod -G users abc && \
-  mkdir -p \
-    /app \
-    /config \
-    /defaults \
-    /dockforgeopy && \
-  echo "**** cleanup ****" && \
-  rm -rf \
-    /tmp/*
+RUN echo "**** install runtime packages ****" && \
+    apk add --no-cache \
+        alpine-release \
+        bash \
+        ca-certificates \
+        catatonit \
+        coreutils \
+        curl \
+        findutils \
+        jq \
+        netcat-openbsd \
+        procps-ng \
+        shadow \
+        tzdata && \
+    echo "**** create abc user and make our folders ****" && \
+    groupmod -g 1000 users && \
+    useradd -u 911 -U -d /config -s /bin/false abc && \
+    usermod -G users abc && \
+    mkdir -p \
+        /app \
+        /config \
+        /defaults \
+        /dockforgeopy && \
+    echo "**** cleanup ****" && \
+    rm -rf /tmp/*
 
 # add local files
 COPY root/ /
