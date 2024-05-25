@@ -45,7 +45,7 @@ ARG S6_OVERLAY_VERSION="v3.1.6.2"
 COPY assets/s6-overlay/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz
 COPY assets/s6-overlay/s6-overlay-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz
 COPY assets/s6-overlay/s6-overlay-symlinks-noarch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-noarch-${S6_OVERLAY_VERSION}.tar.xz
-COPY assets/s6-overlay/s6-overlay-symlinks-arch-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-arch-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz
+COPY assets/s6-overlay/s6-overlay-symlinks-arch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-arch-${S6_OVERLAY_VERSION}.tar.xz
 
 # add s6 overlay
 RUN tar -C /root-out -Jxpf /tmp/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz
