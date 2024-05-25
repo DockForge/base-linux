@@ -1,0 +1,11 @@
+# buildx    docker build --platform linux/amd64,linux/arm64,linux/arm/v7 -t your_local_image_name:latest --output type=oci,dest=your_local_image_name.tar .
+# AMD64:    docker buildx build --platform linux/amd64 -t base-linux:amd64 --load .
+# ARM64:    docker buildx build --platform linux/arm64 -t base-linux:arm64 --load .
+# ARM/v7:   docker buildx build --platform linux/arm/v7 -t base-linux:armv7 --load .
+# docker run -d -p 2222:22 --name base-linux base-linux:amd64
+# docker stop base-linux && docker rm base-linux && docker run -d -p 2222:22 --name base-linux base-linux:amd64
+# CMD:      docker stop base-linux && docker rm base-linux && docker run -d -p 2222:22 --name base-linux base-linux:amd64
+# PS:       docker stop base-linux; docker rm base-linux; docker run -d -p 2222:22 --name base-linux base-linux:amd64
+
+
+# ARM64:    docker buildx build --platform linux/arm64 -t base-linux:arm64 --build-arg ARCH=aarch64 --load .
