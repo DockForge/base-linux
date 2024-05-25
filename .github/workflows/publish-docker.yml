@@ -66,4 +66,3 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64,linux/s390x
           tags: ${{ env.TAGS }}
-          build-args: TARGETARCH=${{ matrix.arch }}

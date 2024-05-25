@@ -6,14 +6,14 @@ FROM alpine:3.19 as rootfs-layer
 ENV ROOTFS=/root-out
 ENV REL=v3.20
 
-# build argument for architecture
-ARG TARGETARCH
-RUN echo "Building for architecture: ${TARGETARCH}"
-RUN case ${TARGETARCH} in \
-      "amd64") ARCH="x86_64";; \
-      "arm64") ARCH="aarch64";; \
-      "s390x") ARCH="s390x";; \
-      *) echo "Unsupported architecture"; exit 1;; \
+# build argument for target platform
+ARG TARGETPLATFORM
+RUN echo "Building for platform: ${TARGETPLATFORM}"
+RUN case ${TARGETPLATFORM} in \
+      "linux/amd64") ARCH="x86_64";; \
+      "linux/arm64") ARCH="aarch64";; \
+      "linux/s390x") ARCH="s390x";; \
+      *) echo "Unsupported platform"; exit 1;; \
     esac && \
     echo "Architecture set to: ${ARCH}"
 
@@ -40,17 +40,16 @@ RUN mkdir -p "$ROOTFS/etc/apk" && \
 
 # set version for s6 overlay
 ARG S6_OVERLAY_VERSION="v3.1.6.2"
-ARG S6_OVERLAY_ARCH=${ARCH}
 
 # copy s6 overlay from assets directory
 COPY assets/s6-overlay/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz
-COPY assets/s6-overlay/s6-overlay-${S6_OVERLAY_ARCH}-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-${S6_OVERLAY_ARCH}-${S6_OVERLAY_VERSION}.tar.xz
+COPY assets/s6-overlay/s6-overlay-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz
 COPY assets/s6-overlay/s6-overlay-symlinks-noarch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-noarch-${S6_OVERLAY_VERSION}.tar.xz
-COPY assets/s6-overlay/s6-overlay-symlinks-arch-${S6_OVERLAY_ARCH}-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-arch-${S6_OVERLAY_VERSION}.tar.xz
+COPY assets/s6-overlay/s6-overlay-symlinks-arch-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-arch-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz
 
 # add s6 overlay
 RUN tar -C /root-out -Jxpf /tmp/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz
-RUN tar -C /root-out -Jxpf /tmp/s6-overlay-${S6_OVERLAY_ARCH}-${S6_OVERLAY_VERSION}.tar.xz
+RUN tar -C /root-out -Jxpf /tmp/s6-overlay-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz
 
 # add s6 optional symlinks
 RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-noarch-${S6_OVERLAY_VERSION}.tar.xz
