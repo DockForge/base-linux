@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest    
     outputs:
         SHA_SHORT: ${{ steps.fetch-sha.outputs.SHA_SHORT }}
+        BRANCH_NAME: ${{ steps.extract-branch-name.outputs.BRANCH_NAME }}
     strategy:
       matrix:
         platform: [amd64, arm64] # arm64, s390x
@@ -41,8 +42,10 @@ jobs:
             echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Extract Branch Name
+        id: extract-branch-name
         run: |
             echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+            echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
 
       - name: ENV Variables
         run: |
@@ -100,21 +103,32 @@ jobs:
     runs-on: ubuntu-latest    
     env:
         SHA_SHORT: ${{ needs.build-and-push.outputs.SHA_SHORT }}
+        BRANCH_NAME: ${{ needs.build-and-push.outputs.BRANCH_NAME }}
     steps:
 
-      - name: Print SHA_SHORT
+      - name: Print ENV Variables
         run: |
-          echo "SHA_SHORT: ${{ env.SHA_SHORT }}"
+            echo "SHA_SHORT: ${{ env.SHA_SHORT }}"
+            echo "BRANCH_NAME: ${{ env.BRANCH_NAME }}"
         
 
       - name: Fetch Tags from Docker Hub
         run: |
-          SHA_SHORT=${{ env.SHA_SHORT }}
-          # Assuming use of a Docker Hub API endpoint to fetch tags; this is hypothetical
-          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/dublok/base-linux/tags?name=$SHA_SHORT")
-          TAGS=$(echo $RESPONSE | jq -r '.results[].name')
-          echo "Fetched tags: $TAGS"
+            SHA_SHORT=${{ env.SHA_SHORT }}
+            RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/dublok/base-linux/tags?name=$SHA_SHORT")
+            TAGS=$(echo $RESPONSE | jq -r '.results[].name')
+            echo "Fetched tags: $TAGS"
 
+      - name: Create and Push Docker Manifest
+        run: |
+            MANIFEST_CMD="docker manifest create dublok/base-linux:alpine-${env.BRANCH_NAME}"
+            for tag in $TAGS; do
+                MANIFEST_CMD+=" --amend dublok/base-linux:${tag}"
+            done
+            echo "Running command: $MANIFEST_CMD"
+            DOCKER_CLI_EXPERIMENTAL=enabled $MANIFEST_CMD
+            DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push dublok/base-linux:alpine-${env.BRANCH_NAME}
+        shell: /usr/bin/bash -e {0}
 
     #   - name: Log in to DockerHub
     #     uses: docker/login-action@v3
