@@ -121,13 +121,14 @@ jobs:
 
       - name: Create and Push Docker Manifest
         run: |
-            MANIFEST_CMD="docker manifest create dublok/base-linux:alpine-$(env.BRANCH_NAME)"
+            BRANCH_NAME=${{ env.BRANCH_NAME }}
+            MANIFEST_CMD="docker manifest create dublok/base-linux:alpine-$BRANCH_NAME"
             for tag in $TAGS; do
-                MANIFEST_CMD+=" --amend dublok/base-linux:${tag}"
+            MANIFEST_CMD+=" --amend dublok/base-linux:${tag}"
             done
             echo "Running command: $MANIFEST_CMD"
             DOCKER_CLI_EXPERIMENTAL=enabled $MANIFEST_CMD
-            DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push dublok/base-linux:alpine-$(env.BRANCH_NAME)
+            DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push dublok/base-linux:alpine-$BRANCH_NAME
         shell: /usr/bin/bash -e {0}
 
     #   - name: Log in to DockerHub
