@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - '**'
+
 env:
     BaseOS: alpine
 
@@ -15,7 +16,7 @@ jobs:
         SHA_SHORT: ${{ steps.fetch-sha.outputs.SHA_SHORT }}
     strategy:
       matrix:
-        platform: [amd64,arm64] # arm64, s390x
+        platform: [amd64, arm64] # arm64, s390x
 
     steps:
       - name: Checkout repository
@@ -81,6 +82,7 @@ jobs:
 
       - name: Print Build Args
         run: |
+          source $GITHUB_ENV
           echo "BUILD_ARGS: ${BUILD_ARGS}"
 
       - name: Build and Push Docker Images
@@ -97,7 +99,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest    
     env:
-        SHA_SHORT: ${{ needs.fetch-sha.outputs.SHA_SHORT }}
+        SHA_SHORT: ${{ needs.build-and-push.outputs.SHA_SHORT }}
     steps:
 
       - name: Print SHA_SHORT
@@ -107,11 +109,12 @@ jobs:
 
       - name: Fetch Tags from Docker Hub
         run: |
-          SHA_SHORT=$(git rev-parse --short HEAD)
+          SHA_SHORT=${{ env.SHA_SHORT }}
           # Assuming use of a Docker Hub API endpoint to fetch tags; this is hypothetical
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/dublok/base-linux/tags?name=$SHA_SHORT")
           TAGS=$(echo $RESPONSE | jq -r '.results[].name')
           echo "Fetched tags: $TAGS"
+
 
     #   - name: Log in to DockerHub
     #     uses: docker/login-action@v3
