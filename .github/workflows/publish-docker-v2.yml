@@ -37,6 +37,10 @@ jobs:
             elif [ "${{ matrix.platform }}" == "arm64" ]; then
               echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=aarch64" >> $GITHUB_ENV
             fi
+
+            
+        - name: Fetch Commit SHA
+          run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
   
         - name: Build Docker Image
           uses: docker/build-push-action@v5.0.0
@@ -45,7 +49,7 @@ jobs:
             file: ./src/Dockerfile
             load: true
             platforms: ${{ matrix.platform }}
-            tags: dublok/base-linux:alpine-${{ matrix.platform }}-${{ github.sha }}
+            tags: dublok/base-linux:alpine-${{ matrix.platform }}-${{ env.SHA_SHORT }}
             build-args: ${{ env.BUILD_ARGS }}
 
         - name: Verify Image on Registry (Placeholder for actual verification)
@@ -55,7 +59,7 @@ jobs:
           if: ${{ github.event_name == 'push' }}
           run: |
             DOCKER_CLI_EXPERIMENTAL=enabled docker manifest create dublok/base-linux:alpine-latest \
-              --amend dublok/base-linux:alpine-amd64-${{ github.sha }} \
-              --amend dublok/base-linux:alpine-arm64-${{ github.sha }}
+              --amend dublok/base-linux:alpine-amd64-${{ env.SHA_SHORT }} \
+              --amend dublok/base-linux:alpine-arm64-${{ env.SHA_SHORT }}
             DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push dublok/base-linux:alpine-latest
   
