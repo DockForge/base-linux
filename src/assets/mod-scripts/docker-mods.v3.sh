@@ -275,7 +275,7 @@ get_arch(){
     fi
 
     case "${arch}" in
-    x86_64 )
+    amd64 ) # x86_64
         arch="amd64"
         ;;
     aarch64 )
