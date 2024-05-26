@@ -57,6 +57,17 @@ jobs:
         run: |
           source $GITHUB_ENV
           echo "TAGS: ${TAGS}"
+          
+      - name: Set Build Args
+        run: |
+          echo "BUILD_ARGS=TARGETPLATFORM=${{ matrix.platform }}" >> $GITHUB_ENV
+          if [ "${{ matrix.platform }}" == "amd64" ]; then
+            echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=x86_64" >> $GITHUB_ENV
+          fi
+
+      - name: Print Build Args
+        run: |
+          echo "BUILD_ARGS: ${BUILD_ARGS}"
 
       - name: Build and Push Docker Images
         uses: docker/build-push-action@v5.0.0
@@ -66,5 +77,4 @@ jobs:
           push: true
           platforms: ${{ matrix.platform }}
           tags: ${{ env.TAGS }}
-          build-args: |
-            TARGETPLATFORM=${{ matrix.platform }}
+          build-args: ${{ env.BUILD_ARGS }}

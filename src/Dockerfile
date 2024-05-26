@@ -5,11 +5,8 @@ FROM alpine:3.19 as rootfs-layer
 # environment
 ENV ROOTFS=/root-out
 ENV REL=v3.20
-
-# build argument for target platform
-ARG TARGETPLATFORM
-
-ENV ARCH=${TARGETPLATFORM}
+ARG TARGETPLATFORM=""
+ARG ARCH=""
 
 RUN echo "Building for platform: ${TARGETPLATFORM}"
 RUN echo "Architecture set to: ${ARCH}"
