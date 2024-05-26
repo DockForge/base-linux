@@ -118,20 +118,23 @@ jobs:
             RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/dublok/base-linux/tags?name=$SHA_SHORT")
             TAGS=$(echo $RESPONSE | jq -r '.results[].name')
             echo "Fetched tags: $TAGS"
+            echo "TAGS=$TAGS" >> $GITHUB_ENV
 
       - name: Create and Push Docker Manifest
         run: |
             BRANCH_NAME=${{ env.BRANCH_NAME }}
+            TAGS="${{ env.TAGS }}"
+            
             if [ -n "$TAGS" ]; then
-            MANIFEST_CMD="docker manifest create dublok/base-linux:alpine-$BRANCH_NAME"
-            for tag in $TAGS; do
-                MANIFEST_CMD+=" --amend ${tag}"
-            done
-            echo "Running command: $MANIFEST_CMD"
-            DOCKER_CLI_EXPERIMENTAL=enabled $MANIFEST_CMD
-            DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push dublok/base-linux:alpine-$BRANCH_NAME
+                MANIFEST_CMD="docker manifest create dublok/base-linux:alpine-$BRANCH_NAME"
+                for tag in $TAGS; do
+                    MANIFEST_CMD+=" --amend dublok/base-linux:${tag}"
+                done
+                echo "Running command: $MANIFEST_CMD"
+                DOCKER_CLI_EXPERIMENTAL=enabled $MANIFEST_CMD
+                DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push dublok/base-linux:alpine-$BRANCH_NAME
             else
-            echo "No tags fetched. Skipping docker manifest creation."
+                echo "No tags fetched. Skipping docker manifest creation."
             fi
         shell: /usr/bin/bash -e {0}
 
