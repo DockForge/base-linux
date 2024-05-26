@@ -10,7 +10,9 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    
+    outputs:
+        SHA_SHORT: ${{ steps.fetch-sha.outputs.SHA_SHORT }}
     strategy:
       matrix:
         platform: [amd64,arm64] # arm64, s390x
@@ -32,10 +34,14 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Fetch Commit SHA
-        run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        id: fetch-sha
+        run: |
+            echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+            echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Extract Branch Name
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+        run: |
+            echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
 
       - name: ENV Variables
         run: |
@@ -89,11 +95,15 @@ jobs:
 
   create-and-push-manifest:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    
+    env:
+        SHA_SHORT: ${{ needs.fetch-sha.outputs.SHA_SHORT }}
     steps:
 
-      - name: Fetch Commit SHA
-        run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: Print SHA_SHORT
+        run: |
+          echo "SHA_SHORT: ${{ env.SHA_SHORT }}"
+        
 
       - name: Fetch Tags from Docker Hub
         run: |
