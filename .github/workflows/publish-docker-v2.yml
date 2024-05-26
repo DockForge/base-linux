@@ -47,7 +47,10 @@ jobs:
             platforms: ${{ matrix.platform }}
             tags: dublok/base-linux:alpine-${{ matrix.platform }}-${{ github.sha }}
             build-args: ${{ env.BUILD_ARGS }}
-  
+
+        - name: Verify Image on Registry (Placeholder for actual verification)
+          run: sleep 60
+    
         - name: Create and Push Manifest
           if: ${{ github.event_name == 'push' }}
           run: |
