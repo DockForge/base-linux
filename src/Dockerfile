@@ -19,6 +19,12 @@ RUN case ${TARGETPLATFORM} in \
 
 ENV ARCH=${ARCH}
 
+RUN echo "Building for platform: ${TARGETPLATFORM}"
+RUN echo "Architecture set to: ${ARCH}"
+RUN echo "RootFS set to: ${ROOTFS}"
+RUN echo "Alpine release set to: ${REL}"
+# RUN echo "Mirror set to: ${MIRROR}"
+
 ENV MIRROR=http://dl-cdn.alpinelinux.org/alpine
 ENV PACKAGES=alpine-baselayout,\
 alpine-keys,\
