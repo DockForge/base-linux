@@ -64,7 +64,7 @@ jobs:
           context: ./src
           file: ./src/Dockerfile
           push: true
-          platforms: linux/${{ matrix.platform }}
+          platforms: ${{ matrix.platform }}
           tags: ${{ env.TAGS }}
           build-args: |
-            TARGETPLATFORM=linux/${{ matrix.platform }}
+            TARGETPLATFORM=${{ matrix.platform }}
