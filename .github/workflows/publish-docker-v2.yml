@@ -99,7 +99,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: TEMP_TAGS
-        run: echo "${{ needs.build-and-push.outputs.temp_tags }}"
+        run: |
+            TEMP_TAGS="${{ needs.build-and-push.outputs.temp_tags }}"
+            TAGS_ARRAY=(${TEMP_TAGS//,/ })
+            for i in "${TAGS_ARRAY[@]}"; do
+              echo "TAG: $i"
+            done
+            
 
 
       - name: Log in to DockerHub
