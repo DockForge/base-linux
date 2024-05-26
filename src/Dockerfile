@@ -8,6 +8,8 @@ ENV REL=v3.20
 
 # build argument for target platform
 ARG TARGETPLATFORM
+ARG ARCH
+
 RUN echo "Building for platform: ${TARGETPLATFORM}"
 RUN case ${TARGETPLATFORM} in \
       "linux/amd64") ARCH="x86_64";; \
