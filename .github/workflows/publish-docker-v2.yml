@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - '**'
+env:
+    BaseOS: alpine
 
 jobs:
   build-and-push:
@@ -45,11 +47,11 @@ jobs:
       - name: Define Tags
         run: |
           source $GITHUB_ENV
-          DEFAULT_TAGS="dublok/base-linux:alpine-${{ matrix.platform }}-${GITHUB_REF_NAME},dublok/base-linux:alpine-${{ matrix.platform }}-${SHA_SHORT}"
+          DEFAULT_TAGS="dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${GITHUB_REF_NAME},dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${SHA_SHORT}"
           echo "TAGS=${DEFAULT_TAGS}" >> $GITHUB_ENV
           
           if [[ $GITHUB_REF_NAME == v* ]]; then
-            LATEST_TAGS="${DEFAULT_TAGS},dublok/base-linux:alpine-latest"
+            LATEST_TAGS="${DEFAULT_TAGS},dublok/base-linux:${{ env.BaseOS }}-latest"
             echo "TAGS=${LATEST_TAGS}" >> $GITHUB_ENV
           fi
 
