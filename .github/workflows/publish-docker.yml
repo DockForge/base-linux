@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [amd64] # arm64, s390x
+        platform: [amd64,arm64] # arm64, s390x
 
     steps:
       - name: Checkout repository
@@ -63,6 +63,8 @@ jobs:
           echo "BUILD_ARGS=TARGETPLATFORM=${{ matrix.platform }}" >> $GITHUB_ENV
           if [ "${{ matrix.platform }}" == "amd64" ]; then
             echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=x86_64" >> $GITHUB_ENV
+          elif [ "${{ matrix.platform }}" == "arm64" ]; then
+            echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=aarch64" >> $GITHUB_ENV
           fi
 
       - name: Print Build Args
