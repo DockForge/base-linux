@@ -48,12 +48,14 @@ jobs:
         run: |
           source $GITHUB_ENV
           TEMP_TAGS="dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${BRANCH_NAME}-${SHA_SHORT},dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${BRANCH_NAME},dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${SHA_SHORT}"
+          echo "TAGS=${TEMP_TAGS}" >> $GITHUB_ENV
+
           DEFAULT_TAGS="dublok/base-linux:${{ env.BaseOS }}-${GITHUB_REF_NAME},dublok/base-linux:${{ env.BaseOS }}-${SHA_SHORT}"
           echo "TAGS=${DEFAULT_TAGS}" >> $GITHUB_ENV
           
           if [[ $GITHUB_REF_NAME == v* ]]; then
-            LATEST_TAGS="${DEFAULT_TAGS},dublok/base-linux:${{ env.BaseOS }}-latest"
-            echo "TAGS=${LATEST_TAGS}" >> $GITHUB_ENV
+          DEFAULT_TAGS="${DEFAULT_TAGS},dublok/base-linux:${{ env.BaseOS }}-latest"
+            echo "DEFAULT_TAGS=${DEFAULT_TAGS}" >> $GITHUB_ENV
           fi
 
       - name: Tags
