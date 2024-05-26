@@ -47,7 +47,8 @@ jobs:
       - name: Define Tags
         run: |
           source $GITHUB_ENV
-          DEFAULT_TAGS="dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${GITHUB_REF_NAME},dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${SHA_SHORT}"
+          TEMP_TAGS="dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${BRANCH_NAME}-${SHA_SHORT},dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${BRANCH_NAME},dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${SHA_SHORT}"
+          DEFAULT_TAGS="dublok/base-linux:${{ env.BaseOS }}-${GITHUB_REF_NAME},dublok/base-linux:${{ env.BaseOS }}-${SHA_SHORT}"
           echo "TAGS=${DEFAULT_TAGS}" >> $GITHUB_ENV
           
           if [[ $GITHUB_REF_NAME == v* ]]; then
@@ -80,6 +81,35 @@ jobs:
           file: ./src/Dockerfile
           push: true
           platforms: ${{ matrix.platform }}
-          tags: ${{ env.TAGS }}
+          tags: ${{ env.TEMP_TAGS }}
           build-args: ${{ env.BUILD_ARGS }}
-          
+
+      - name: Set output
+        run: echo "::set-output name=temp_tags::$TEMP_TAGS"
+        id: tag_output
+
+    outputs:
+        temp_tags: ${{ steps.tag_output.outputs.temp_tags }}
+
+  create-and-push-manifest:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: TEMP_TAGS
+        run: echo "${{ needs.build-and-push.outputs.temp_tags }}"
+
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Create and Push Docker Manifest
+        run: |
+          DOCKER_CLI_EXPERIMENTAL=enabled docker manifest create ***/base-linux:alpine-latest \
+            --amend dublok/base-linux:alpine-amd64-${{ github.sha }} \
+            --amend dublok/base-linux:alpine-arm64-${{ github.sha }}
+          DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push ***/base-linux:alpine-latest
+        shell: /usr/bin/bash -e {0}
+        
