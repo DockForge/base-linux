@@ -8,16 +8,15 @@ ENV REL=v3.20
 
 # build argument for target platform
 ARG TARGETPLATFORM
-ARG ARCH
-
-RUN echo "Building for platform: ${TARGETPLATFORM}"
-RUN case ${TARGETPLATFORM} in \
+RUN echo "Building for platform: ${TARGETPLATFORM}" && \
+    case ${TARGETPLATFORM} in \
       "linux/amd64") ARCH="x86_64";; \
       "linux/arm64") ARCH="aarch64";; \
       "linux/s390x") ARCH="s390x";; \
       *) echo "Unsupported platform"; exit 1;; \
     esac && \
-    echo "Architecture set to: ${ARCH}"
+    echo "Architecture set to: ${ARCH}" && \
+    export ARCH=${ARCH}
 
 RUN echo "Building for platform: ${TARGETPLATFORM}"
 RUN echo "Architecture set to: ${ARCH}"
