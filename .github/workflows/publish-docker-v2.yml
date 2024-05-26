@@ -5,61 +5,79 @@ on:
   push:
     branches:
       - '**'
-      
+
 jobs:
-    build:
-      runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          platform: [amd64, arm64]
-  
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v4
-  
-        - name: Set up QEMU
-          uses: docker/setup-qemu-action@v3
-  
-        - name: Set up Docker Buildx
-          uses: docker/setup-buildx-action@v3
-  
-        - name: Log in to DockerHub
-          uses: docker/login-action@v3
-          with:
-            username: ${{ secrets.DOCKER_USERNAME }}
-            password: ${{ secrets.DOCKER_TOKEN }}
-  
-        - name: Set Build Args
-          run: |
-            echo "BUILD_ARGS=TARGETPLATFORM=${{ matrix.platform }}" >> $GITHUB_ENV
-            if [ "${{ matrix.platform }}" == "amd64" ]; then
-              echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=x86_64" >> $GITHUB_ENV
-            elif [ "${{ matrix.platform }}" == "arm64" ]; then
-              echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=aarch64" >> $GITHUB_ENV
-            fi
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [amd64,arm64] # arm64, s390x
 
-            
-        - name: Fetch Commit SHA
-          run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-  
-        - name: Build Docker Image
-          uses: docker/build-push-action@v5.0.0
-          with:
-            context: ./src
-            file: ./src/Dockerfile
-            load: true
-            platforms: ${{ matrix.platform }}
-            tags: dublok/base-linux:alpine-${{ matrix.platform }}-${{ env.SHA_SHORT }}
-            build-args: ${{ env.BUILD_ARGS }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-        - name: Verify Image on Registry (Placeholder for actual verification)
-          run: sleep 60
-    
-        - name: Create and Push Manifest
-          if: ${{ github.event_name == 'push' }}
-          run: |
-            DOCKER_CLI_EXPERIMENTAL=enabled docker manifest create dublok/base-linux:alpine-latest \
-              --amend dublok/base-linux:alpine-amd64-${{ env.SHA_SHORT }} \
-              --amend dublok/base-linux:alpine-arm64-${{ env.SHA_SHORT }}
-            DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push dublok/base-linux:alpine-latest
-  
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Fetch Commit SHA
+        run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Extract Branch Name
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
+      - name: ENV Variables
+        run: |
+          source $GITHUB_ENV
+          echo "BRANCH_NAME: ${BRANCH_NAME}"
+          echo "SHA_SHORT: ${SHA_SHORT}"
+          echo "GITHUB_REF_NAME: ${GITHUB_REF_NAME}"
+
+      - name: Define Tags
+        run: |
+          source $GITHUB_ENV
+          DEFAULT_TAGS="dublok/base-linux:alpine-${{ matrix.platform }}-${GITHUB_REF_NAME},dublok/base-linux:alpine-${{ matrix.platform }}-${SHA_SHORT}"
+          echo "TAGS=${DEFAULT_TAGS}" >> $GITHUB_ENV
+          
+          if [[ $GITHUB_REF_NAME == v* ]]; then
+            LATEST_TAGS="${DEFAULT_TAGS},dublok/base-linux:alpine-latest"
+            echo "TAGS=${LATEST_TAGS}" >> $GITHUB_ENV
+          fi
+
+      - name: Tags
+        run: |
+          source $GITHUB_ENV
+          echo "TAGS: ${TAGS}"
+          
+      - name: Set Build Args
+        run: |
+          echo "BUILD_ARGS=TARGETPLATFORM=${{ matrix.platform }}" >> $GITHUB_ENV
+          if [ "${{ matrix.platform }}" == "amd64" ]; then
+            echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=x86_64" >> $GITHUB_ENV
+          elif [ "${{ matrix.platform }}" == "arm64" ]; then
+            echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=aarch64" >> $GITHUB_ENV
+          fi
+
+      - name: Print Build Args
+        run: |
+          echo "BUILD_ARGS: ${BUILD_ARGS}"
+
+      - name: Build and Push Docker Images
+        uses: docker/build-push-action@v5.0.0
+        with:
+          context: ./src
+          file: ./src/Dockerfile
+          push: true
+          platforms: ${{ matrix.platform }}
+          tags: ${{ env.TAGS }}
+          build-args: ${{ env.BUILD_ARGS }}
+          
