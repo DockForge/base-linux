@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [amd64, arm64, s390x]
+        platform: [amd64] # arm64, s390x
 
     steps:
       - name: Checkout repository
