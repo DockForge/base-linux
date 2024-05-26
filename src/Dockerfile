@@ -19,8 +19,6 @@ RUN case ${TARGETPLATFORM} in \
     esac && \
     echo "Architecture set to: ${ARCH}"
 
-ENV ARCH=${ARCH}
-
 RUN echo "Building for platform: ${TARGETPLATFORM}"
 RUN echo "Architecture set to: ${ARCH}"
 RUN echo "RootFS set to: ${ROOTFS}"
