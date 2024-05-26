@@ -8,6 +8,7 @@ ENV REL=v3.20
 
 # build argument for target platform
 ARG TARGETPLATFORM
+
 RUN echo "Building for platform: ${TARGETPLATFORM}" && \
     case ${TARGETPLATFORM} in \
       "linux/amd64") ARCH="x86_64";; \
@@ -16,10 +17,18 @@ RUN echo "Building for platform: ${TARGETPLATFORM}" && \
       *) echo "Unsupported platform"; exit 1;; \
     esac && \
     echo "Architecture set to: ${ARCH}" && \
-    export ARCH=${ARCH}
+    echo "ARCH=${ARCH}" > /tmp/arch.env && \
+    . /tmp/arch.env && \
+    echo "Exporting ARCH=${ARCH}"
+
+ARG ARCH
+ENV ARCH=${ARCH}
 
 RUN echo "Building for platform: ${TARGETPLATFORM}"
 RUN echo "Architecture set to: ${ARCH}"
+
+
+
 RUN echo "RootFS set to: ${ROOTFS}"
 RUN echo "Alpine release set to: ${REL}"
 # RUN echo "Mirror set to: ${MIRROR}"
