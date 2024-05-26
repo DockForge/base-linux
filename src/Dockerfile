@@ -38,18 +38,18 @@ RUN mkdir -p "$ROOTFS/etc/apk" && \
 ARG S6_OVERLAY_VERSION="v3.1.6.2"
 
 # copy s6 overlay from assets directory
-COPY assets/s6-overlay/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz
-COPY assets/s6-overlay/s6-overlay-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz
-COPY assets/s6-overlay/s6-overlay-symlinks-noarch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-noarch-${S6_OVERLAY_VERSION}.tar.xz
-COPY assets/s6-overlay/s6-overlay-symlinks-arch-${S6_OVERLAY_VERSION}.tar.xz /tmp/s6-overlay-symlinks-arch-${S6_OVERLAY_VERSION}.tar.xz
+COPY assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp/s6-overlay-noarch.tar.xz
+COPY assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-${ARCH}.tar.xz /tmp/s6-overlay-${ARCH}.tar.xz
+COPY assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz /tmp/s6-overlay-symlinks-noarch.tar.xz
+COPY assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz /tmp/s6-overlay-symlinks-arch.tar.xz
 
 # add s6 overlay
-RUN tar -C /root-out -Jxpf /tmp/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz
-RUN tar -C /root-out -Jxpf /tmp/s6-overlay-${ARCH}-${S6_OVERLAY_VERSION}.tar.xz
+RUN tar -C /root-out -Jxpf /tmp/s6-overlay-noarch.tar.xz
+RUN tar -C /root-out -Jxpf /tmp/s6-overlay-${ARCH}.tar.xz
 
 # add s6 optional symlinks
-RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-noarch-${S6_OVERLAY_VERSION}.tar.xz
-RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-arch-${S6_OVERLAY_VERSION}.tar.xz
+RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz
+RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz
 
 # Runtime stage
 FROM scratch
