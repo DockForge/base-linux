@@ -110,8 +110,17 @@ jobs:
         run: |
             echo "SHA_SHORT: ${{ env.SHA_SHORT }}"
             echo "BRANCH_NAME: ${{ env.BRANCH_NAME }}"
-        
-
+  
+      - name: Set up Docker Buildx
+        run: |
+            mkdir -p ~/.docker/cli-plugins
+            curl -sSL https://github.com/docker/buildx/releases/latest/download/buildx-v0.8.2.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
+            chmod +x ~/.docker/cli-plugins/docker-buildx
+            docker buildx version
+  
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+  
       - name: Fetch Tags from Docker Hub
         run: |
             SHA_SHORT=${{ env.SHA_SHORT }}
@@ -119,19 +128,18 @@ jobs:
             TAGS=$(echo $RESPONSE | jq -r '.results[].name' | tr '\n' ',')
             echo "Fetched tags: $TAGS"
             echo "TAGS=$TAGS" >> $GITHUB_ENV
-
+  
       - name: Create and Push Docker Manifest
         run: |
             BRANCH_NAME=${{ env.BRANCH_NAME }}
             IFS=',' read -r -a TAG_ARRAY <<< "${{ env.TAGS }}"
             if [ ${#TAG_ARRAY[@]} -gt 0 ]; then
-                MANIFEST_CMD="docker manifest create dublok/base-linux:alpine-$BRANCH_NAME"
+                docker buildx create --use
                 for tag in "${TAG_ARRAY[@]}"; do
-                    MANIFEST_CMD+=" --amend dublok/base-linux:${tag}"
+                    docker pull dublok/base-linux:${tag}
                 done
-                echo "Running command: $MANIFEST_CMD"
-                DOCKER_CLI_EXPERIMENTAL=enabled $MANIFEST_CMD
-                DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push dublok/base-linux:alpine-$BRANCH_NAME
+                docker buildx imagetools create -t dublok/base-linux:alpine-$BRANCH_NAME $(printf "dublok/base-linux:%s " "${TAG_ARRAY[@]}")
+                docker buildx imagetools inspect dublok/base-linux:alpine-$BRANCH_NAME
             else
                 echo "No tags fetched. Skipping docker manifest creation."
             fi
