@@ -111,7 +111,7 @@ jobs:
             echo "SHA_SHORT: ${{ env.SHA_SHORT }}"
             echo "BRANCH_NAME: ${{ env.BRANCH_NAME }}"
   
-      - name: Set up Docker Buildx
+      - name: Install Docker Buildx
         run: |
           mkdir -p ~/.docker/cli-plugins
           curl -sSL https://github.com/docker/buildx/releases/latest/download/buildx-v0.8.2.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
