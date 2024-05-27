@@ -100,10 +100,10 @@ jobs:
 
   create-and-push-manifest:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    
     env:
-        SHA_SHORT: ${{ needs.build-and-push.outputs.SHA_SHORT }}
-        BRANCH_NAME: ${{ needs.build-and-push.outputs.BRANCH_NAME }}
+        SHA_SHORT: ${{ github.sha }}
+        BRANCH_NAME: ${{ github.ref_name }}
     steps:
       - name: Print ENV Variables
         run: |
@@ -120,6 +120,7 @@ jobs:
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Fetch Tags from Docker Hub
+        id: fetch-tags
         run: |
           SHA_SHORT=${{ env.SHA_SHORT }}
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/dublok/base-linux/tags?name=$SHA_SHORT")
@@ -130,24 +131,20 @@ jobs:
       - name: Create and Push Docker Manifest
         run: |
           BRANCH_NAME=${{ env.BRANCH_NAME }}
-          IFS=',' read -r -a TAG_ARRAY <<< "${{ env.TAGS }}"
+          TAGS=${{ steps.fetch-tags.outputs.TAGS }}
+          IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
           VALID_TAGS=()
           docker buildx create --use
           for tag in "${TAG_ARRAY[@]}"; do
-              echo "Checking tag dublok/base-linux:${tag}"
               if docker buildx imagetools inspect dublok/base-linux:${tag} > /dev/null 2>&1; then
-                  echo "Tag dublok/base-linux:${tag} is valid"
                   VALID_TAGS+=("dublok/base-linux:${tag}")
-                  docker pull dublok/base-linux:${tag}
-              else
-                  echo "Skipping tag dublok/base-linux:${tag} as it does not support the current architecture"
               fi
           done
           if [ ${#VALID_TAGS[@]} -gt 0 ]; then
               docker buildx imagetools create -t dublok/base-linux:alpine-$BRANCH_NAME "${VALID_TAGS[@]}"
               docker buildx imagetools inspect dublok/base-linux:alpine-$BRANCH_NAME
           else
-              echo "No valid tags fetched. Skipping docker manifest creation."
+              echo "No valid tags found. Skipping Docker manifest creation."
           fi
         shell: /usr/bin/bash -e {0}
 
