@@ -110,6 +110,15 @@ jobs:
           echo "SHA_SHORT: ${{ env.SHA_SHORT }}"
           echo "BRANCH_NAME: ${{ env.BRANCH_NAME }}"
 
+      - name: Fetch Tags from Docker Hub
+        id: fetch-tags
+        run: |
+          SHA_SHORT=${{ env.SHA_SHORT }}
+          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/dublok/base-linux/tags?name=$SHA_SHORT")
+          TAGS=$(echo $RESPONSE | jq -r '.results[].name' | tr '\n' ',')
+          echo "Fetched tags: $TAGS"
+          echo "TAGS=$TAGS" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
   
@@ -118,12 +127,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-
-      # - name: Pull amd64 image
-      #   run: docker pull dublok/base-linux:alpine-7737071-amd64
-  
-      # - name: Pull arm64 image
-      #   run: docker pull dublok/base-linux:alpine-7737071-arm64
       
       - name: Create and push multi-arch manifest
         run: |
