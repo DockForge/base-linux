@@ -110,7 +110,13 @@ jobs:
         run: |
             echo "SHA_SHORT: ${{ env.SHA_SHORT }}"
             echo "BRANCH_NAME: ${{ env.BRANCH_NAME }}"
-  
+
+            
+      - name: Update Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+            
       - name: Install Docker Buildx
         run: |
           mkdir -p ~/.docker/cli-plugins
