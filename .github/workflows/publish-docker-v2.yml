@@ -127,13 +127,24 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      
+
       - name: Create and push multi-arch manifest
         run: |
-          docker buildx imagetools create \
-            --tag dublok/base-linux:alpine-7737071 \
-            dublok/base-linux:alpine-7737071-amd64 \
-            dublok/base-linux:alpine-7737071-arm64
+          TAGS=${{ env.TAGS }}
+          IFS=' ' read -r -a TAG_ARRAY <<< "$TAGS"
+          IMAGETOOLS_CMD="docker buildx imagetools create --tag dublok/base-linux:alpine-${{ env.SHA_SHORT }} "
+          for TAG in "${TAG_ARRAY[@]}"; do
+            IMAGETOOLS_CMD+="dublok/base-linux:$TAG "
+          done
+          echo "Running command: $IMAGETOOLS_CMD"
+          eval $IMAGETOOLS_CMD
+    
+      # - name: Create and push multi-arch manifest
+      #   run: |
+      #     docker buildx imagetools create \
+      #       --tag dublok/base-linux:alpine-7737071 \
+      #       dublok/base-linux:alpine-7737071-amd64 \
+      #       dublok/base-linux:alpine-7737071-arm64
 
       # - name: Log in to Docker Hub
       #   run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
