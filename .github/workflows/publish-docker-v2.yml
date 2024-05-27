@@ -132,7 +132,12 @@ jobs:
         run: |
           TAGS=${{ env.TAGS }}
           IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
-          IMAGETOOLS_CMD="docker buildx imagetools create --tag dublok/base-linux:${{ env.BaseOS }}-${{ env.SHA_SHORT }}  --tag dublok/base-linux:${{ env.BaseOS }}-${{ env.BRANCH_NAME }} "
+          IMAGETOOLS_CMD="docker buildx imagetools create --tag dublok/base-linux:${{ env.BaseOS }}-${{ env.SHA_SHORT }} --tag dublok/base-linux:${{ env.BaseOS }}-${{ env.BRANCH_NAME }} "
+          
+          if [[ "${{ env.BRANCH_NAME }}" == v* ]]; then
+            IMAGETOOLS_CMD+="--tag dublok/base-linux:${{ env.BaseOS }}-latest "
+          fi
+          
           for TAG in "${TAG_ARRAY[@]}"; do
             IMAGETOOLS_CMD+="dublok/base-linux:$TAG "
           done
