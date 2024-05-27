@@ -61,19 +61,10 @@ jobs:
           source $GITHUB_ENV
           TEMP_TAGS="dublok/base-linux:${{ env.BaseOS }}-${SHA_SHORT}-${{ matrix.platform }}"
           echo "TEMP_TAGS=${TEMP_TAGS}" >> $GITHUB_ENV
-
-          DEFAULT_TAGS="dublok/base-linux:${{ env.BaseOS }}-${GITHUB_REF_NAME},dublok/base-linux:${{ env.BaseOS }}-${SHA_SHORT}"
-          echo "DEFAULT_TAGS=${DEFAULT_TAGS}" >> $GITHUB_ENV
           
-          if [[ $GITHUB_REF_NAME == v* ]]; then
-          DEFAULT_TAGS="${DEFAULT_TAGS},dublok/base-linux:${{ env.BaseOS }}-latest"
-            echo "DEFAULT_TAGS=${DEFAULT_TAGS}" >> $GITHUB_ENV
-          fi
-
       - name: Tags
         run: |
           source $GITHUB_ENV
-          echo "DEFAULT_TAGS: ${DEFAULT_TAGS}"
           echo "TEMP_TAGS: ${TEMP_TAGS}"
           
       - name: Set Build Args
