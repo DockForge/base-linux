@@ -57,7 +57,7 @@ jobs:
       - name: Define Tags
         run: |
           source $GITHUB_ENV
-          TEMP_TAGS="dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${BRANCH_NAME}-${SHA_SHORT},dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${BRANCH_NAME},dublok/base-linux:${{ env.BaseOS }}-${{ matrix.platform }}-${SHA_SHORT}"
+          TEMP_TAGS="dublok/base-linux:${{ env.BaseOS }}-${SHA_SHORT}-${{ matrix.platform }}"
           echo "TEMP_TAGS=${TEMP_TAGS}" >> $GITHUB_ENV
 
           DEFAULT_TAGS="dublok/base-linux:${{ env.BaseOS }}-${GITHUB_REF_NAME},dublok/base-linux:${{ env.BaseOS }}-${SHA_SHORT}"
