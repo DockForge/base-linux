@@ -113,10 +113,10 @@ jobs:
   
       - name: Set up Docker Buildx
         run: |
-            mkdir -p ~/.docker/cli-plugins
-            curl -sSL https://github.com/docker/buildx/releases/latest/download/buildx-v0.8.2.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
-            chmod +x ~/.docker/cli-plugins/docker-buildx
-            docker buildx version
+          mkdir -p ~/.docker/cli-plugins
+          curl -sSL https://github.com/docker/buildx/releases/latest/download/buildx-v0.8.2.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
+          chmod +x ~/.docker/cli-plugins/docker-buildx
+          docker buildx version
   
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
