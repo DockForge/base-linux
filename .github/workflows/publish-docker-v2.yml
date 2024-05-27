@@ -131,22 +131,26 @@ jobs:
         run: |
             BRANCH_NAME=${{ env.BRANCH_NAME }}
             IFS=',' read -r -a TAG_ARRAY <<< "${{ env.TAGS }}"
-            if [ ${#TAG_ARRAY[@]} -gt 0 ]; then
-                docker buildx create --use
-                for tag in "${TAG_ARRAY[@]}"; do
-                    if docker buildx imagetools inspect dublok/base-linux:${tag} > /dev/null 2>&1; then
-                        docker pull dublok/base-linux:${tag}
-                    else
-                        echo "Skipping tag dublok/base-linux:${tag} as it does not support the current architecture"
-                    fi
-                done
-                docker buildx imagetools create -t dublok/base-linux:alpine-$BRANCH_NAME $(printf "dublok/base-linux:%s " "${TAG_ARRAY[@]}")
+            VALID_TAGS=()
+            docker buildx create --use
+            for tag in "${TAG_ARRAY[@]}"; do
+                echo "Checking tag dublok/base-linux:${tag}"
+                if docker buildx imagetools inspect dublok/base-linux:${tag} > /dev/null 2>&1; then
+                    echo "Tag dublok/base-linux:${tag} is valid"
+                    VALID_TAGS+=("dublok/base-linux:${tag}")
+                    docker pull dublok/base-linux:${tag}
+                else
+                    echo "Skipping tag dublok/base-linux:${tag} as it does not support the current architecture"
+                fi
+            done
+            if [ ${#VALID_TAGS[@]} -gt 0 ]; then
+                docker buildx imagetools create -t dublok/base-linux:alpine-$BRANCH_NAME "${VALID_TAGS[@]}"
                 docker buildx imagetools inspect dublok/base-linux:alpine-$BRANCH_NAME
             else
-                echo "No tags fetched. Skipping docker manifest creation."
+                echo "No valid tags fetched. Skipping docker manifest creation."
             fi
         shell: /usr/bin/bash -e {0}
-  
+          
 
     #   - name: Log in to DockerHub
     #     uses: docker/login-action@v3
