@@ -132,63 +132,10 @@ jobs:
         run: |
           TAGS=${{ env.TAGS }}
           IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
-          IMAGETOOLS_CMD="docker buildx imagetools create --tag dublok/base-linux:alpine-${{ env.SHA_SHORT }} "
+          IMAGETOOLS_CMD="docker buildx imagetools create --tag dublok/base-linux:${{ env.BaseOS }}-${{ env.SHA_SHORT }}  --tag dublok/base-linux:${{ env.BaseOS }}-${{ env.BRANCH_NAME }} "
           for TAG in "${TAG_ARRAY[@]}"; do
             IMAGETOOLS_CMD+="dublok/base-linux:$TAG "
           done
           echo "Running command: $IMAGETOOLS_CMD"
           eval $IMAGETOOLS_CMD
-    
-      # - name: Create and push multi-arch manifest
-      #   run: |
-      #     docker buildx imagetools create \
-      #       --tag dublok/base-linux:alpine-7737071 \
-      #       dublok/base-linux:alpine-7737071-amd64 \
-      #       dublok/base-linux:alpine-7737071-arm64
-
-      # - name: Log in to Docker Hub
-      #   run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      # - name: Fetch Tags from Docker Hub
-      #   id: fetch-tags
-      #   run: |
-      #     SHA_SHORT=${{ env.SHA_SHORT }}
-      #     RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/dublok/base-linux/tags?name=$SHA_SHORT")
-      #     TAGS=$(echo $RESPONSE | jq -r '.results[].name' | tr '\n' ',')
-      #     echo "Fetched tags: $TAGS"
-      #     echo "TAGS=$TAGS" >> $GITHUB_ENV
-
-      # - name: Create and Push Docker Manifest
-      #   run: |
-      #     BRANCH_NAME=${{ env.BRANCH_NAME }}
-      #     TAGS=${{ steps.fetch-tags.outputs.TAGS }}
-      #     IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
-      #     VALID_TAGS=()
-      #     docker buildx create --use
-      #     for tag in "${TAG_ARRAY[@]}"; do
-      #         if docker buildx imagetools inspect dublok/base-linux:${tag} > /dev/null 2>&1; then
-      #             VALID_TAGS+=("dublok/base-linux:${tag}")
-      #         fi
-      #     done
-      #     if [ ${#VALID_TAGS[@]} -gt 0 ]; then
-      #         docker buildx imagetools create -t dublok/base-linux:alpine-$BRANCH_NAME "${VALID_TAGS[@]}"
-      #         docker buildx imagetools inspect dublok/base-linux:alpine-$BRANCH_NAME
-      #     else
-      #         echo "No valid tags found. Skipping Docker manifest creation."
-      #     fi
-      #   shell: /usr/bin/bash -e {0}
-
-    #   - name: Log in to DockerHub
-    #     uses: docker/login-action@v3
-    #     with:
-    #       username: ${{ secrets.DOCKER_USERNAME }}
-    #       password: ${{ secrets.DOCKER_TOKEN }}
-
-    #   - name: Create and Push Docker Manifest
-    #     run: |
-    #       DOCKER_CLI_EXPERIMENTAL=enabled docker manifest create ***/base-linux:alpine-latest \
-    #         --amend dublok/base-linux:alpine-amd64-${{ github.sha }} \
-    #         --amend dublok/base-linux:alpine-arm64-${{ github.sha }}
-    #       DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push ***/base-linux:alpine-latest
-    #     shell: /usr/bin/bash -e {0}
-        
+            
