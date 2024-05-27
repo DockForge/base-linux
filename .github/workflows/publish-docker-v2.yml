@@ -102,6 +102,7 @@ jobs:
         run: |
           echo "SHA_SHORT: ${{ env.SHA_SHORT }}"
           echo "BRANCH_NAME: ${{ env.BRANCH_NAME }}"
+          echo "GITHUB_REF_NAME: ${GITHUB_REF_NAME}"
 
       - name: Fetch Tags from Docker Hub
         id: fetch-tags
@@ -125,9 +126,9 @@ jobs:
         run: |
           TAGS=${{ env.TAGS }}
           IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
-          IMAGETOOLS_CMD="docker buildx imagetools create --tag dublok/base-linux:${{ env.BaseOS }}-${{ env.SHA_SHORT }} --tag dublok/base-linux:${{ env.BaseOS }}-${{ env.BRANCH_NAME }} "
+          IMAGETOOLS_CMD="docker buildx imagetools create --tag dublok/base-linux:${{ env.BaseOS }}-${{ env.SHA_SHORT }} --tag dublok/base-linux:${{ env.BaseOS }}-${GITHUB_REF_NAME} "
           
-          if [[ "${{ env.BRANCH_NAME }}" == v* ]]; then
+          if [[ "${GITHUB_REF_NAME}" == v* ]]; then
             IMAGETOOLS_CMD+="--tag dublok/base-linux:${{ env.BaseOS }}-latest "
           fi
           
