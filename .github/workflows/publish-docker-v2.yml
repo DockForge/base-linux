@@ -115,7 +115,7 @@ jobs:
         run: |
           SHA_SHORT=${{ env.SHA_SHORT }}
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/dublok/base-linux/tags?name=$SHA_SHORT")
-          TAGS=$(echo $RESPONSE | jq -r '.results[].name' | tr '\n' ',')
+          TAGS=$(echo $RESPONSE | jq -r '.results[].name' | tr '\n' ',' | sed 's/,$//')
           echo "Fetched tags: $TAGS"
           echo "TAGS=$TAGS" >> $GITHUB_ENV
 
@@ -131,7 +131,7 @@ jobs:
       - name: Create and push multi-arch manifest
         run: |
           TAGS=${{ env.TAGS }}
-          IFS=' ' read -r -a TAG_ARRAY <<< "$TAGS"
+          IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
           IMAGETOOLS_CMD="docker buildx imagetools create --tag dublok/base-linux:alpine-${{ env.SHA_SHORT }} "
           for TAG in "${TAG_ARRAY[@]}"; do
             IMAGETOOLS_CMD+="dublok/base-linux:$TAG "
