@@ -10,6 +10,7 @@ on:
 
 env:
     BaseOS: alpine
+    Repository: dublok/base-linux
 
 jobs:
   build-and-push:
@@ -59,7 +60,7 @@ jobs:
       - name: Define Tags
         run: |
           source $GITHUB_ENV
-          TEMP_TAGS="dublok/base-linux:${{ env.BaseOS }}-${SHA_SHORT}-${{ matrix.platform }}"
+          TEMP_TAGS="${{ env.Repository }}:${{ env.BaseOS }}-${SHA_SHORT}-${{ matrix.platform }}"
           echo "TEMP_TAGS=${TEMP_TAGS}" >> $GITHUB_ENV
           
       - name: Tags
@@ -108,7 +109,7 @@ jobs:
         id: fetch-tags
         run: |
           SHA_SHORT=${{ env.SHA_SHORT }}
-          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/dublok/base-linux/tags?name=$SHA_SHORT")
+          RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/${{ env.Repository }}/tags?name=$SHA_SHORT")
           TAGS=$(echo $RESPONSE | jq -r '.results[].name' | tr '\n' ',' | sed 's/,$//')
           echo "Fetched tags: $TAGS"
           echo "TAGS=$TAGS" >> $GITHUB_ENV
@@ -126,14 +127,20 @@ jobs:
         run: |
           TAGS=${{ env.TAGS }}
           IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
-          IMAGETOOLS_CMD="docker buildx imagetools create --tag dublok/base-linux:${{ env.BaseOS }}-${{ env.SHA_SHORT }} --tag dublok/base-linux:${{ env.BaseOS }}-${GITHUB_REF_NAME} "
+          IMAGETOOLS_CMD="docker buildx imagetools create --tag ${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }} --tag ${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME} "
           
           if [[ "${GITHUB_REF_NAME}" == v* ]]; then
-            IMAGETOOLS_CMD+="--tag dublok/base-linux:${{ env.BaseOS }}-latest "
+            if [[ "${GITHUB_REF_NAME}" == *alpha* || "${GITHUB_REF_NAME}" == *a* ]]; then
+              IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-alpha "
+            elif [[ "${GITHUB_REF_NAME}" == *beta* || "${GITHUB_REF_NAME}" == *b* ]]; then
+              IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-beta "
+            else
+              IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-latest "
+            fi
           fi
           
           for TAG in "${TAG_ARRAY[@]}"; do
-            IMAGETOOLS_CMD+="dublok/base-linux:$TAG "
+            IMAGETOOLS_CMD+="${{ env.Repository }}:$TAG "
           done
           echo "Running command: $IMAGETOOLS_CMD"
           eval $IMAGETOOLS_CMD
