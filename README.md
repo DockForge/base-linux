@@ -1,7 +1,5 @@
 # [Custom Base Docker Image with S6 Overlay](https://github.com/DockForge/base-linux)
 
-## Project Description
-
 This project provides a custom base Docker image built on Alpine Linux, integrated with S6 Overlay for efficient process management. It is designed to be lightweight, secure, and extensible, making it ideal for various deployment environments. The image supports multiple architectures, including amd64 and arm64, ensuring versatility. It includes automated GitHub Actions workflows to build and push the image to DockerHub, facilitating seamless integration and deployment. This base image is suitable for developers looking to create reliable and manageable containerized applications.
 
 ## Installation Instructions
