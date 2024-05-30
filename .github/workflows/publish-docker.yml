@@ -132,18 +132,18 @@ jobs:
             IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
             IMAGETOOLS_CMD="docker buildx imagetools create --tag ${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }} --tag ${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME} "
             
-            IMAGE_LIST="${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }},${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME}"
+            IMAGE_LIST="${{ env.BaseOS }}-${{ env.SHA_SHORT }},${{ env.BaseOS }}-${GITHUB_REF_NAME}"
             
             if [[ "${GITHUB_REF_NAME}" == v* ]]; then
               if [[ "${GITHUB_REF_NAME}" == *alpha* || "${GITHUB_REF_NAME}" == *a* ]]; then
                 IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-alpha "
-                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-alpha"
+                IMAGE_LIST+=",${{ env.BaseOS }}-alpha"
               elif [[ "${GITHUB_REF_NAME}" == *beta* || "${GITHUB_REF_NAME}" == *b* ]]; then
                 IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-beta "
-                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-beta"
+                IMAGE_LIST+=",${{ env.BaseOS }}-beta"
               else
                 IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-latest "
-                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-latest"
+                IMAGE_LIST+=",${{ env.BaseOS }}-latest"
               fi
             fi
             
