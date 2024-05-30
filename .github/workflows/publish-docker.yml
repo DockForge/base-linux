@@ -148,7 +148,7 @@ jobs:
           eval $IMAGETOOLS_CMD
 
       - name: Run Docker Package Versions Action
-        uses: DockForge/packages@v0.0.1
+        uses: DockForge/packages@main
         with:
           images: "dublok/base-linux:alpine-latest,dublok/base-linux:alpine-latest"
           github_token: ${{ secrets.GITHUB_TOKEN }}
