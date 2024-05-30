@@ -152,9 +152,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.6
-
       - name: Run Docker Package Versions Action
         uses: DockForge/packages@v0.0.1
         with:
