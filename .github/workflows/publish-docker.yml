@@ -160,4 +160,5 @@ jobs:
         with:
           images: ${{ env.IMAGE_LIST }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          output_path: /workspace/sboms
           
