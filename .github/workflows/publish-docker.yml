@@ -150,6 +150,6 @@ jobs:
       - name: Run Docker Package Versions Action
         uses: DockForge/packages@v0.0.1
         with:
-          images: "dublok/base-linux:alpine-latest, dublok/base-linux:alpine-main"
+          images: "dublok/base-linux:alpine-latest,dublok/base-linux:alpine-latest"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           
