@@ -78,7 +78,7 @@ jobs:
           elif [ "${{ matrix.platform }}" == "arm64" ]; then
             echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=aarch64" >> $GITHUB_ENV
           fi
-
+          
       - name: Print Build Args
         run: |
           source $GITHUB_ENV
@@ -145,5 +145,18 @@ jobs:
             IMAGETOOLS_CMD+="${{ env.Repository }}:$TAG "
           done
           echo "Running command: $IMAGETOOLS_CMD"
-          eval $IMAGETOOLS_CMD
-            
+          eval $IMAGETOOLS_CMD            
+
+  sbom:
+    needs: create-and-push-manifest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.6
+
+      - name: Run Docker Package Versions Action
+        uses: DockForge/packages@v0.0.1
+        with:
+          image: "dublok/base-linux:alpine-latest"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
