@@ -149,7 +149,6 @@ jobs:
             
             for TAG in "${TAG_ARRAY[@]}"; do
               IMAGETOOLS_CMD+="${{ env.Repository }}:$TAG "
-              IMAGE_LIST+=",${{ env.Repository }}:$TAG"
             done
             
             echo "IMAGE_LIST=$IMAGE_LIST" >> $GITHUB_ENV
