@@ -126,30 +126,39 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Create and push multi-arch manifest
+        id: create_manifest
         run: |
-          TAGS=${{ env.TAGS }}
-          IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
-          IMAGETOOLS_CMD="docker buildx imagetools create --tag ${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }} --tag ${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME} "
-          
-          if [[ "${GITHUB_REF_NAME}" == v* ]]; then
-            if [[ "${GITHUB_REF_NAME}" == *alpha* || "${GITHUB_REF_NAME}" == *a* ]]; then
-              IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-alpha "
-            elif [[ "${GITHUB_REF_NAME}" == *beta* || "${GITHUB_REF_NAME}" == *b* ]]; then
-              IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-beta "
-            else
-              IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-latest "
+            TAGS=${{ env.TAGS }}
+            IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
+            IMAGETOOLS_CMD="docker buildx imagetools create --tag ${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }} --tag ${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME} "
+            
+            IMAGE_LIST="${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }},${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME}"
+            
+            if [[ "${GITHUB_REF_NAME}" == v* ]]; then
+              if [[ "${GITHUB_REF_NAME}" == *alpha* || "${GITHUB_REF_NAME}" == *a* ]]; then
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-alpha "
+                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-alpha"
+              elif [[ "${GITHUB_REF_NAME}" == *beta* || "${GITHUB_REF_NAME}" == *b* ]]; then
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-beta "
+                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-beta"
+              else
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-latest "
+                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-latest"
+              fi
             fi
-          fi
-          
-          for TAG in "${TAG_ARRAY[@]}"; do
-            IMAGETOOLS_CMD+="${{ env.Repository }}:$TAG "
-          done
-          echo "Running command: $IMAGETOOLS_CMD"
-          eval $IMAGETOOLS_CMD
-
+            
+            for TAG in "${TAG_ARRAY[@]}"; do
+              IMAGETOOLS_CMD+="${{ env.Repository }}:$TAG "
+              IMAGE_LIST+=",${{ env.Repository }}:$TAG"
+            done
+            
+            echo "IMAGE_LIST=$IMAGE_LIST" >> $GITHUB_ENV
+            echo "Running command: $IMAGETOOLS_CMD"
+            eval $IMAGETOOLS_CMD
+  
       - name: Run Docker Package Versions Action
         uses: DockForge/packages@main
         with:
-          images: "dublok/base-linux:alpine-latest,dublok/base-linux:alpine-latest"
+          images: ${{ env.IMAGE_LIST }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           
