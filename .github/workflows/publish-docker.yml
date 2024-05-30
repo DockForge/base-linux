@@ -163,5 +163,5 @@ jobs:
           output_path: "sboms"
           sbom_file_prefix: ""
           sbom_file_suffix: ""
-          sbom_file_name: "[TAG]" # [REPOSITORY]_[TAG]
+          sbom_file_name: "[TAG]"
           
