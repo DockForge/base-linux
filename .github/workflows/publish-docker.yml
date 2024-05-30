@@ -145,15 +145,11 @@ jobs:
             IMAGETOOLS_CMD+="${{ env.Repository }}:$TAG "
           done
           echo "Running command: $IMAGETOOLS_CMD"
-          eval $IMAGETOOLS_CMD            
+          eval $IMAGETOOLS_CMD
 
-  sbom:
-    needs: create-and-push-manifest
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Run Docker Package Versions Action
         uses: DockForge/packages@v0.0.1
         with:
-          image: "dublok/base-linux:alpine-latest"
+          images: "dublok/base-linux:alpine-latest, dublok/base-linux:alpine-main"
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          
