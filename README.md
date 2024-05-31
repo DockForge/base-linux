@@ -70,7 +70,7 @@ We welcome contributions from the community. If you wish to contribute, please f
 
 ## Contact Information
 
-- Email: [dockforge@gmail.com](mailto:dockforge@gmail.com) / [dockforge@dublok.com](mailto:dockforge@dublok.com)
+- Email: [dublokcom@gmail.com](mailto:dublokcom@gmail.com) / [dockforge@dublok.com](mailto:dockforge@dublok.com)
 - Main Maintainer: Ercin Dedeoglu [LinkedIn](https://www.linkedin.com/in/ercindedeoglu/)
 
 ## Dependencies
