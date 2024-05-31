@@ -9,6 +9,8 @@ on:
       - '**'
     paths:
       - 'src/**'
+  schedule:
+    - cron: '0 0 * * 0'
 
 env:
     BaseOS: alpine
