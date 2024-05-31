@@ -143,7 +143,9 @@ jobs:
                 IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-beta"
               else
                 IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-latest "
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }} "
                 IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-latest"
+                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}"
               fi
             fi
             
