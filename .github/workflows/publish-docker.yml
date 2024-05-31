@@ -158,7 +158,7 @@ jobs:
             eval $IMAGETOOLS_CMD
   
       - name: Run Docker Package Versions Action
-        uses: DockForge/SBOMinify@v1
+        uses: DockForge/SBOMinify@latest
         with:
           images: ${{ env.IMAGE_LIST }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
