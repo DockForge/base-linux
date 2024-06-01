@@ -76,8 +76,14 @@ RUN chown -R root:root /docker-mods /etc/s6-overlay
 RUN find /docker-mods -type f -exec chmod +x {} \; && \
     find /etc/s6-overlay/ -type f -exec chmod +x {} \;
 
-# Debug: List files and permissions in /etc/s6-overlay
-RUN ls -lR /etc/s6-overlay
+# Debug: Verify script existence and permissions
+RUN if [ -f /etc/s6-overlay/s6-rc.d/init-envfile/run ]; then echo "init-envfile/run exists"; else echo "init-envfile/run missing"; fi
+RUN ls -l /etc/s6-overlay/s6-rc.d/init-envfile/run
+RUN if [ -f /etc/s6-overlay/s6-rc.d/init-migrations/run ]; then echo "init-migrations/run exists"; else echo "init-migrations/run missing"; fi
+RUN ls -l /etc/s6-overlay/s6-rc.d/init-migrations/run
+
+# Ensure permissions are set
+RUN chmod +x /etc/s6-overlay/s6-rc.d/init-envfile/run /etc/s6-overlay/s6-rc.d/init-migrations/run
 
 # environment variables
 ENV PS1="$(whoami)@$(hostname):$(pwd)\\$ " \
