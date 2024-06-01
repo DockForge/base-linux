@@ -65,9 +65,8 @@ LABEL maintainer="Dublok"
 COPY assets/mod-scripts/docker-mods.${MODS_VERSION}.sh /docker-mods
 COPY assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s6-rc.d/init-mods-package-install/run
 
-# copy init scripts to the correct location
-COPY root/etc/s6-overlay/s6-rc.d/init-migrations/run /etc/s6-overlay/s6-rc.d/init-migrations/run
-COPY root/etc/s6-overlay/s6-rc.d/init-envfile/run /etc/s6-overlay/s6-rc.d/init-envfile/run
+# add local files
+COPY root/ /
 
 # Ensure correct permissions for all scripts
 RUN chmod 744 /docker-mods && \
@@ -110,8 +109,5 @@ RUN echo "**** install runtime packages ****" && \
         /dockforgeopy && \
     echo "**** cleanup ****" && \
     rm -rf /tmp/*
-
-# add local files
-COPY root/ /
 
 ENTRYPOINT ["/init"]
