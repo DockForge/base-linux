@@ -54,6 +54,9 @@ RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz
 # Set permissions for s6-overlay scripts
 RUN find /root-out/etc/s6-overlay/ -type f -exec chmod +x {} \;
 
+# Debug: List files and permissions in /root-out/etc/s6-overlay
+RUN ls -lR /root-out/etc/s6-overlay
+
 # Runtime stage
 FROM scratch
 COPY --from=rootfs-layer /root-out/ /
@@ -68,13 +71,13 @@ LABEL maintainer="Dublok"
 COPY assets/mod-scripts/docker-mods.${MODS_VERSION}.sh /docker-mods
 COPY assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s6-rc.d/init-mods-package-install/run
 
-# set permissions for all scripts in /docker-mods and /etc/s6-overlay
+# Ensure correct permissions and ownership
+RUN chown -R root:root /docker-mods /etc/s6-overlay
 RUN find /docker-mods -type f -exec chmod +x {} \; && \
     find /etc/s6-overlay/ -type f -exec chmod +x {} \;
 
-# Ensure permissions for the problematic scripts
-RUN chmod +x /etc/s6-overlay/s6-rc.d/init-envfile/run
-RUN chmod +x /etc/s6-overlay/s6-rc.d/init-migrations/run
+# Debug: List files and permissions in /etc/s6-overlay
+RUN ls -lR /etc/s6-overlay
 
 # environment variables
 ENV PS1="$(whoami)@$(hostname):$(pwd)\\$ " \
