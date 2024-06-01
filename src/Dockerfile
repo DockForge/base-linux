@@ -51,10 +51,6 @@ RUN tar -C /root-out -Jxpf /tmp/s6-overlay-${ARCH}.tar.xz
 RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz
 RUN tar -C /root-out -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz
 
-# Ensure correct permissions for init scripts
-RUN chmod +x /root-out/etc/s6-overlay/s6-rc.d/init-migrations/run
-RUN chmod +x /root-out/etc/s6-overlay/s6-rc.d/init-envfile/run
-
 # Runtime stage
 FROM scratch
 COPY --from=rootfs-layer /root-out/ /
@@ -69,9 +65,13 @@ LABEL maintainer="Dublok"
 COPY assets/mod-scripts/docker-mods.${MODS_VERSION}.sh /docker-mods
 COPY assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s6-rc.d/init-mods-package-install/run
 
-# set permissions for mod scripts
+# set permissions
 RUN chmod 744 /docker-mods && \
     chmod 744 /etc/s6-overlay/s6-rc.d/init-mods-package-install/run
+
+# Ensure correct permissions for init scripts
+RUN chmod 744 /etc/s6-overlay/s6-rc.d/init-migrations/run && \
+    chmod 744 /etc/s6-overlay/s6-rc.d/init-envfile/run
 
 # environment variables
 ENV PS1="$(whoami)@$(hostname):$(pwd)\\$ " \
