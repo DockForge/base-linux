@@ -68,11 +68,9 @@ COPY assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s
 # add local files
 COPY root/ /
 
-# Ensure correct permissions for all scripts
-RUN chmod 744 /docker-mods && \
-    chmod 744 /etc/s6-overlay/s6-rc.d/init-mods-package-install/run && \
-    chmod 744 /etc/s6-overlay/s6-rc.d/init-migrations/run && \
-    chmod 744 /etc/s6-overlay/s6-rc.d/init-envfile/run
+# Ensure correct permissions for all scripts in s6-overlay directory
+RUN find /etc/s6-overlay/s6-rc.d/ -type f -exec chmod 744 {} \; && \
+    chmod 744 /docker-mods
 
 # environment variables
 ENV PS1="$(whoami)@$(hostname):$(pwd)\\$ " \
