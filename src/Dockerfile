@@ -65,14 +65,14 @@ LABEL maintainer="Dublok"
 COPY assets/mod-scripts/docker-mods.${MODS_VERSION}.sh /docker-mods
 COPY assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s6-rc.d/init-mods-package-install/run
 
-# Ensure correct permissions for mod scripts
-RUN chmod 744 /docker-mods && \
-    chmod 744 /etc/s6-overlay/s6-rc.d/init-mods-package-install/run
-
-# Copy and set permissions for init scripts
+# copy init scripts to the correct location
 COPY root/etc/s6-overlay/s6-rc.d/init-migrations/run /etc/s6-overlay/s6-rc.d/init-migrations/run
 COPY root/etc/s6-overlay/s6-rc.d/init-envfile/run /etc/s6-overlay/s6-rc.d/init-envfile/run
-RUN chmod 744 /etc/s6-overlay/s6-rc.d/init-migrations/run && \
+
+# Ensure correct permissions for all scripts
+RUN chmod 744 /docker-mods && \
+    chmod 744 /etc/s6-overlay/s6-rc.d/init-mods-package-install/run && \
+    chmod 744 /etc/s6-overlay/s6-rc.d/init-migrations/run && \
     chmod 744 /etc/s6-overlay/s6-rc.d/init-envfile/run
 
 # environment variables
