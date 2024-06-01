@@ -72,6 +72,10 @@ COPY assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s
 RUN find /docker-mods -type f -exec chmod +x {} \; && \
     find /etc/s6-overlay/ -type f -exec chmod +x {} \;
 
+# Ensure permissions for the problematic scripts
+RUN chmod +x /etc/s6-overlay/s6-rc.d/init-envfile/run
+RUN chmod +x /etc/s6-overlay/s6-rc.d/init-migrations/run
+
 # environment variables
 ENV PS1="$(whoami)@$(hostname):$(pwd)\\$ " \
     HOME="/root" \
