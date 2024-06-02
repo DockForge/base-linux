@@ -69,7 +69,7 @@ COPY assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s
 COPY root/ /
 
 # Ensure correct permissions for all scripts in s6-overlay directory
-RUN find /etc/s6-overlay/s6-rc.d/ -type f -exec chmod 744 {} \; && \
+RUN find /etc/s6-overlay/ -type f -exec chmod 744 {} \; && \
     chmod 744 /docker-mods
 
 # environment variables
