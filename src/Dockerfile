@@ -58,7 +58,7 @@ ARG BUILD_DATE
 ARG VERSION
 ARG MODS_VERSION="v3"
 ARG PKG_INST_VERSION="v1"
-LABEL build_version="DockForge version:- ${VERSION} Build-date:- ${BUILD_DATE}"
+LABEL build_version="Version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="Dublok"
 
 # copy mod scripts from assets directory
@@ -66,7 +66,7 @@ COPY assets/mod-scripts/docker-mods.${MODS_VERSION}.sh /docker-mods
 COPY assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s6-rc.d/init-mods-package-install/run
 
 RUN \
-printf "DockForge version: ${VERSION}\nBuild-date: ${BUILD_DATE}" > /build_version
+printf "Version: ${VERSION}\nBuild-date: ${BUILD_DATE}" > /build_version
 
 # add local files
 COPY root/ /

@@ -76,7 +76,7 @@ jobs:
         run: |
           echo "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
           SHA_SHORT=$(git rev-parse --short HEAD)
-          echo "VERSION=${GITHUB_REF_NAME}-${SHA_SHORT}" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF_NAME}/${SHA_SHORT}" >> $GITHUB_ENV
           echo "TARGETPLATFORM=${{ matrix.platform }}" >> $GITHUB_ENV
           if [ "${{ matrix.platform }}" == "amd64" ]; then
             echo "ARCH=x86_64" >> $GITHUB_ENV
