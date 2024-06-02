@@ -137,17 +137,24 @@ jobs:
             IMAGE_LIST="${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }},${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME}"
             
             if [[ "${GITHUB_REF_NAME}" == v* ]]; then
-              if [[ "${GITHUB_REF_NAME}" == *alpha* || "${GITHUB_REF_NAME}" == *a* ]]; then
-                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-alpha "
-                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-alpha"
-              elif [[ "${GITHUB_REF_NAME}" == *beta* || "${GITHUB_REF_NAME}" == *b* ]]; then
-                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-beta "
-                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-beta"
-              else
-                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-latest "
-                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }} "
-                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-latest"
-                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}"
+              # Extract major version (e.g., v1 from v1.0.2, v1.0.2.1, etc.)
+              if [[ "${GITHUB_REF_NAME}" =~ ^v([0-9]+) ]]; then
+                MAJOR_VERSION="v${BASH_REMATCH[1]}"
+                
+                if [[ "${GITHUB_REF_NAME}" =~ [aA]$ ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-alpha "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-alpha"
+                elif [[ "${GITHUB_REF_NAME}" =~ [bB]$ ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-beta "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-beta"
+                else
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION} "
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-latest "
+                  IMAGETOOLS_CMD+="--tag ${{ env.BaseOS }} "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}"
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-latest"
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}"
+                fi
               fi
             fi
             
@@ -158,6 +165,7 @@ jobs:
             echo "IMAGE_LIST=$IMAGE_LIST" >> $GITHUB_ENV
             echo "Running command: $IMAGETOOLS_CMD"
             eval $IMAGETOOLS_CMD
+        
   
       - name: Run Docker Package Versions Action
         uses: DockForge/SBOMinify@latest
