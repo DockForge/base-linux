@@ -74,12 +74,15 @@ jobs:
           
       - name: Set Build Args
         run: |
+          echo "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
+          echo "VERSION=${GITHUB_REF_NAME} - ${SHA_SHORT}" >> $GITHUB_ENV
           echo "BUILD_ARGS=TARGETPLATFORM=${{ matrix.platform }}" >> $GITHUB_ENV
           if [ "${{ matrix.platform }}" == "amd64" ]; then
             echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=x86_64" >> $GITHUB_ENV
           elif [ "${{ matrix.platform }}" == "arm64" ]; then
             echo "BUILD_ARGS=${{ env.BUILD_ARGS }} ARCH=aarch64" >> $GITHUB_ENV
           fi
+          echo "BUILD_ARGS=${{ env.BUILD_ARGS }} BUILD_DATE=${{ env.BUILD_DATE }} VERSION=${{ env.VERSION }}" >> $GITHUB_ENV
           
       - name: Print Build Args
         run: |
