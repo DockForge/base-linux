@@ -150,7 +150,7 @@ jobs:
                 else
                   IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION} "
                   IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-latest "
-                  IMAGETOOLS_CMD+="--tag ${{ env.BaseOS }} "
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }} "
                   IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}"
                   IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-latest"
                   IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}"
@@ -165,6 +165,7 @@ jobs:
             echo "IMAGE_LIST=$IMAGE_LIST" >> $GITHUB_ENV
             echo "Running command: $IMAGETOOLS_CMD"
             eval $IMAGETOOLS_CMD
+        
         
   
       - name: Run Docker Package Versions Action
