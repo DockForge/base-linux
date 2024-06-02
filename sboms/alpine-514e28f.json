@@ -43870,15 +43870,14 @@
   "source": {
     "id": "30f5a776315e09e4c317bbcdef578f22416788c5655c02ec0bf3cc65694c8d5c",
     "name": "dublok/base-linux",
-    "version": "alpine-main",
+    "version": "alpine-514e28f",
     "type": "image",
     "metadata": {
-      "userInput": "dublok/base-linux:alpine-main",
+      "userInput": "dublok/base-linux:alpine-514e28f",
       "imageID": "sha256:f06bb02be8e37813297d8086c7e511579c9e842466806ed698a414320b193514",
       "manifestDigest": "sha256:30f5a776315e09e4c317bbcdef578f22416788c5655c02ec0bf3cc65694c8d5c",
       "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
       "tags": [
-        "dublok/base-linux:alpine-main",
         "dublok/base-linux:alpine-514e28f"
       ],
       "imageSize": 26743217,
