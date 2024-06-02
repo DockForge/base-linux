@@ -65,6 +65,9 @@ LABEL maintainer="Dublok"
 COPY assets/mod-scripts/docker-mods.${MODS_VERSION}.sh /docker-mods
 COPY assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s6-rc.d/init-mods-package-install/run
 
+RUN \
+printf "DockForge version: ${VERSION}\nBuild-date: ${BUILD_DATE}" > /build_version
+
 # add local files
 COPY root/ /
 
