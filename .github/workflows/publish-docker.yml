@@ -141,41 +141,97 @@ jobs:
       - name: Create and push multi-arch manifest
         id: create_manifest
         run: |
-            TAGS=${{ env.TAGS }}
-            IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
-            IMAGETOOLS_CMD="docker buildx imagetools create --tag ${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }} --tag ${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME} "
-            
-            IMAGE_LIST="${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }},${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME}"
-            
-            if [[ "${GITHUB_REF_NAME}" == v* ]]; then
-              # Extract major version (e.g., v1 from v1.0.2, v1.0.2.1, etc.)
-              if [[ "${GITHUB_REF_NAME}" =~ ^v([0-9]+) ]]; then
-                MAJOR_VERSION="v${BASH_REMATCH[1]}"
+          TAGS=${{ env.TAGS }}
+          IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
+          IMAGETOOLS_CMD="docker buildx imagetools create --tag ${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }} --tag ${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME} "
+          
+          IMAGE_LIST="${{ env.Repository }}:${{ env.BaseOS }}-${{ env.SHA_SHORT }},${{ env.Repository }}:${{ env.BaseOS }}-${GITHUB_REF_NAME}"
+          
+          if [[ "${GITHUB_REF_NAME}" == v* ]]; then
+            # Extract major version (e.g., v1 from v1.0.2, v1.0.2.1, etc.)
+            if [[ "${GITHUB_REF_NAME}" =~ ^v([0-9]+) ]]; then
+              MAJOR_VERSION="v${BASH_REMATCH[1]}"
+              
+              # Extract additional version components
+              VERSION_REGEX='^v([0-9]+)(\.[0-9]+)?(\.[0-9]+)?(\.[0-9]+)?([aA-zZ])?$'
+              if [[ "${GITHUB_REF_NAME}" =~ $VERSION_REGEX ]]; then
+                MAJOR_MINOR_VERSION="v${BASH_REMATCH[1]}${BASH_REMATCH[2]}"
+                MAJOR_MINOR_PATCH_VERSION="v${BASH_REMATCH[1]}${BASH_REMATCH[2]}${BASH_REMATCH[3]}"
+                FULL_VERSION="v${BASH_REMATCH[1]}${BASH_REMATCH[2]}${BASH_REMATCH[3]}${BASH_REMATCH[4]}"
                 
-                if [[ "${GITHUB_REF_NAME}" =~ [aA]$ ]]; then
-                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-alpha "
-                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-alpha"
-                elif [[ "${GITHUB_REF_NAME}" =~ [bB]$ ]]; then
-                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-beta "
-                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-beta"
+                if [[ -n "${BASH_REMATCH[5]}" ]]; then
+                  SUFFIX="${BASH_REMATCH[5]}"
+                  FULL_VERSION_WITH_SUFFIX="${FULL_VERSION}${SUFFIX}"
                 else
-                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION} "
-                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-latest "
-                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }} "
-                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}"
-                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-latest"
-                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}"
+                  SUFFIX=""
+                  FULL_VERSION_WITH_SUFFIX="${FULL_VERSION}"
                 fi
               fi
+              
+              if [[ "${SUFFIX}" =~ [aA] ]]; then
+                if [[ -n "$FULL_VERSION" ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${FULL_VERSION}-alpha "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${FULL_VERSION}-alpha"
+                fi
+                if [[ -n "$MAJOR_MINOR_PATCH_VERSION" ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_PATCH_VERSION}-alpha "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_PATCH_VERSION}-alpha"
+                fi
+                if [[ -n "$MAJOR_MINOR_VERSION" ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_VERSION}-alpha "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_VERSION}-alpha"
+                fi
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-alpha "
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-alpha "
+                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-alpha"
+                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-alpha"
+              elif [[ "${SUFFIX}" =~ [bB] ]]; then
+                if [[ -n "$FULL_VERSION" ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${FULL_VERSION}-beta "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${FULL_VERSION}-beta"
+                fi
+                if [[ -n "$MAJOR_MINOR_PATCH_VERSION" ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_PATCH_VERSION}-beta "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_PATCH_VERSION}-beta"
+                fi
+                if [[ -n "$MAJOR_MINOR_VERSION" ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_VERSION}-beta "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_VERSION}-beta"
+                fi
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-beta "
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-beta "
+                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}-beta"
+                IMAGE_LIST+=",${{ env.Repository }}:beta"
+              else
+                if [[ -n "$FULL_VERSION" ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${FULL_VERSION} "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${FULL_VERSION}"
+                fi
+                if [[ -n "$MAJOR_MINOR_PATCH_VERSION" ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_PATCH_VERSION} "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_PATCH_VERSION}"
+                fi
+                if [[ -n "$MAJOR_MINOR_VERSION" ]]; then
+                  IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_VERSION} "
+                  IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_MINOR_VERSION}"
+                fi
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION} "
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }}-latest "
+                IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:${{ env.BaseOS }} "
+                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-${MAJOR_VERSION}"
+                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}-latest"
+                IMAGE_LIST+=",${{ env.Repository }}:${{ env.BaseOS }}"
+              fi
             fi
-            
-            for TAG in "${TAG_ARRAY[@]}"; do
-              IMAGETOOLS_CMD+="${{ env.Repository }}:$TAG "
-            done
-            
-            echo "IMAGE_LIST=$IMAGE_LIST" >> $GITHUB_ENV
-            echo "Running command: $IMAGETOOLS_CMD"
-            eval $IMAGETOOLS_CMD
+          fi
+          
+          for TAG in "${TAG_ARRAY[@]}"; do
+            IMAGETOOLS_CMD+="${{ env.Repository }}:$TAG "
+          done
+          
+          echo "IMAGE_LIST=$IMAGE_LIST" >> $GITHUB_ENV
+          echo "Running command: $IMAGETOOLS_CMD"
+          eval $IMAGETOOLS_CMD
         
         
   
