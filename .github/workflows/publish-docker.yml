@@ -208,6 +208,12 @@ jobs:
             IMAGETOOLS_CMD+="--tag ${{ env.Repository }}:$PUSH_TAG "
           done
 
+          TAGS=${{ env.TAGS }}
+          IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
+          for TAG in "${TAG_ARRAY[@]}"; do
+            IMAGETOOLS_CMD+="${{ env.Repository }}:$TAG "
+          done
+
           echo "IMAGETOOLS_CMD: $IMAGETOOLS_CMD"
           eval $IMAGETOOLS_CMD
       
@@ -226,7 +232,6 @@ jobs:
           
           echo "SBOM_TAGS: $SBOM_TAGS"
           echo "SBOM_TAGS=$SBOM_TAGS" >> $GITHUB_ENV
-
             
       - name: Run Docker Package Versions Action
         uses: DockForge/SBOMinify@latest
