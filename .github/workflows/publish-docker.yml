@@ -263,7 +263,7 @@ jobs:
           sbom_file_prefix: ""
           sbom_file_suffix: ""
           sbom_file_name: "[TAG]"
-          
+
   push-github-packages:
     needs: [build-and-push, create-and-push-manifest]
     runs-on: ubuntu-latest
@@ -272,7 +272,6 @@ jobs:
         BRANCH_NAME: ${{ needs.build-and-push.outputs.BRANCH_NAME }}
         TAGS: ${{ needs.create-and-push-manifest.outputs.TAGS }}
         PUSH_TAGS: ${{ needs.create-and-push-manifest.outputs.PUSH_TAGS }}
-        Repository: your-dockerhub-repo-name
     steps:
       - name: Print ENV Variables
         run: |
@@ -284,13 +283,13 @@ jobs:
           echo "REPOSITORY: ${{ env.Repository }}"
           echo "GITHUB_REPOSITORY: ${{ github.repository }}"
           echo "GITHUB_EVENT_REPOSITORY_NAME: ${{ github.event.repository.name }}"
-
+  
       - name: Log in to GitHub Packages
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}          
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -299,10 +298,11 @@ jobs:
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-
+    
       - name: Setup Variables
         run: |
           FULL_IMAGE_NAME=$(echo "ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME >> $GITHUB_ENV"
           echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_ENV
           echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_OUTPUT
 
@@ -310,48 +310,49 @@ jobs:
         run: |
           TAGS=${{ env.TAGS }}
           IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
-
-          for TAG in "${TAG_ARRAY[@]}"; do
+  
+          for TAG in "${TAG_ARRAY[@]}"; do            
             echo "Pulling ${{ env.Repository }}:$TAG [docker pull ${{ env.Repository }}:$TAG]"
-
+  
             # Fetch the manifest for the image
             MANIFEST=$(docker manifest inspect ${{ env.Repository }}:$TAG 2>/dev/null)
-
+  
             if [ $? -ne 0 ]; then
               echo "Error: Unable to fetch manifest for image ${{ env.Repository }}:$TAG"
               exit 1
             fi
-
+  
             # Extract available platforms from the manifest
             PLATFORMS=$(echo "$MANIFEST" | jq -r '.manifests[].platform | "\(.os)/\(.architecture)"' | tr '\n' ' ')
-
+  
             if [ -z "$PLATFORMS" ]; then
               echo "Error: No platforms found for image ${{ env.Repository }}:$TAG"
               exit 1
             fi
-
+  
             echo "Available platforms for ${{ env.Repository }}:$TAG - $PLATFORMS"
-
+  
             # Attempt to pull the image for each platform until successful
             for PLATFORM in $PLATFORMS; do
               echo "Attempting to pull image for platform: $PLATFORM"
               docker pull --platform "$PLATFORM" ${{ env.Repository }}:$TAG && break
             done
-
+  
             if [ $? -ne 0 ]; then
               echo "Error: Failed to pull image ${{ env.Repository }}:$TAG for any available platform"
               exit 1
             fi
-
+  
             echo "Tagging ${{ env.Repository }}:$TAG as $FULL_IMAGE_NAME:$TAG [docker tag ${{ env.Repository }}:$TAG $FULL_IMAGE_NAME:$TAG]"
             docker tag ${{ env.Repository }}:$TAG $FULL_IMAGE_NAME:$TAG
           done
-
+              
       - name: Push Images to GitHub Container Registry
         run: |
           TAGS=${{ env.TAGS }}
-          PUSH_TAGS=$(echo "${PUSH_TAGS}" | sed 's/,$//' | tr '[:upper:]' '[:lower:]')
           IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
+          
+          PUSH_TAGS=$(echo "${PUSH_TAGS}" | sed 's/,$//')
           IFS=',' read -r -a PUSH_TAG_ARRAY <<< "$PUSH_TAGS"
 
           for TAG in "${TAG_ARRAY[@]}"; do
