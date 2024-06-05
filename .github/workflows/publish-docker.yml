@@ -133,7 +133,7 @@ jobs:
         run: |
           SHA_SHORT=${{ env.SHA_SHORT }}
           RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKER_TOKEN }}" "https://hub.docker.com/v2/repositories/${{ env.Repository }}/tags?name=$SHA_SHORT")
-          TAGS=$(echo $RESPONSE | jq -r '.results[].name' | tr '\n' ',' | sed 's/,$//')
+          TAGS=$(echo $RESPONSE | jq -r '.results[].name' | tr '\n' ',' | sed 's/,$//' | tr '[:upper:]' '[:lower:]')
           echo "TAGS: $TAGS"
           echo "TAGS=$TAGS" >> $GITHUB_ENV
           echo "TAGS=$TAGS" >> $GITHUB_OUTPUT
@@ -211,7 +211,7 @@ jobs:
             fi
           fi
 
-          PUSH_TAGS=$(echo "${PUSH_TAGS}" | sed 's/,$//')
+          PUSH_TAGS=$(echo "${PUSH_TAGS}" | sed 's/,$//' | tr '[:upper:]' '[:lower:]')
           echo "PUSH_TAGS: $PUSH_TAGS"
           echo "PUSH_TAGS=$PUSH_TAGS" >> $GITHUB_ENV
           echo "PUSH_TAGS=$PUSH_TAGS" >> $GITHUB_OUTPUT
@@ -301,7 +301,7 @@ jobs:
     
       - name: Setup Variables
         run: |
-          FULL_IMAGE_NAME="ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}"
+          FULL_IMAGE_NAME=$(echo "ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
           echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME >> $GITHUB_ENV"
           echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_ENV
           echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_OUTPUT
@@ -311,7 +311,7 @@ jobs:
           TAGS=${{ env.TAGS }}
           IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
   
-          for TAG in "${TAG_ARRAY[@]}"; do
+          for TAG in "${TAG_ARRAY[@]}"; do            
             echo "Pulling ${{ env.Repository }}:$TAG [docker pull ${{ env.Repository }}:$TAG]"
   
             # Fetch the manifest for the image
