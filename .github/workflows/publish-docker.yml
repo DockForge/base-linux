@@ -310,14 +310,43 @@ jobs:
         run: |
           TAGS=${{ env.TAGS }}
           IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
-
+  
           for TAG in "${TAG_ARRAY[@]}"; do
-            echo "Pulling ${{ env.Repository }}:$TAG"
-            docker pull ${{ env.Repository }}:$TAG
-            echo "Tagging ${{ env.Repository }}:$TAG as $FULL_IMAGE_NAME:$TAG"
+            echo "Pulling ${{ env.Repository }}:$TAG [docker pull ${{ env.Repository }}:$TAG]"
+  
+            # Fetch the manifest for the image
+            MANIFEST=$(docker manifest inspect ${{ env.Repository }}:$TAG 2>/dev/null)
+  
+            if [ $? -ne 0 ]; then
+              echo "Error: Unable to fetch manifest for image ${{ env.Repository }}:$TAG"
+              exit 1
+            fi
+  
+            # Extract available platforms from the manifest
+            PLATFORMS=$(echo "$MANIFEST" | jq -r '.manifests[].platform | "\(.os)/\(.architecture)"' | tr '\n' ' ')
+  
+            if [ -z "$PLATFORMS" ]; then
+              echo "Error: No platforms found for image ${{ env.Repository }}:$TAG"
+              exit 1
+            fi
+  
+            echo "Available platforms for ${{ env.Repository }}:$TAG - $PLATFORMS"
+  
+            # Attempt to pull the image for each platform until successful
+            for PLATFORM in $PLATFORMS; do
+              echo "Attempting to pull image for platform: $PLATFORM"
+              docker pull --platform "$PLATFORM" ${{ env.Repository }}:$TAG && break
+            done
+  
+            if [ $? -ne 0 ]; then
+              echo "Error: Failed to pull image ${{ env.Repository }}:$TAG for any available platform"
+              exit 1
+            fi
+  
+            echo "Tagging ${{ env.Repository }}:$TAG as $FULL_IMAGE_NAME:$TAG [docker tag ${{ env.Repository }}:$TAG $FULL_IMAGE_NAME:$TAG]"
             docker tag ${{ env.Repository }}:$TAG $FULL_IMAGE_NAME:$TAG
           done
-          
+              
       - name: Prepare Build Command
         run: |
           TAGS=${{ env.TAGS }}
@@ -331,7 +360,7 @@ jobs:
           
           PUSH_TAGS=${{ env.PUSH_TAGS }}
           IFS=',' read -r -a PUSH_TAG_ARRAY <<< "$PUSH_TAGS"
-          
+
           for PUSH_TAG in "${PUSH_TAG_ARRAY[@]}"; do
             BUILDX_CMD+=" --tag $FULL_IMAGE_NAME:$PUSH_TAG"
           done
