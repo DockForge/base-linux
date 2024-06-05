@@ -20,7 +20,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     outputs:
-        SHA_SHORT: ${{ steps.fetch-sha.outputs.SHA_SHORT }}${{ steps.set_output.outputs.value }}
+        SHA_SHORT: ${{ steps.fetch-sha.outputs.SHA_SHORT }}
         BRANCH_NAME: ${{ steps.extract-branch-name.outputs.BRANCH_NAME }}
     strategy:
       matrix:
@@ -256,6 +256,8 @@ jobs:
     env:
         SHA_SHORT: ${{ needs.build-and-push.outputs.SHA_SHORT }}
         BRANCH_NAME: ${{ needs.build-and-push.outputs.BRANCH_NAME }}
+        TAGS: ${{ needs.create-and-push-manifest.outputs.TAGS }}
+        PUSH_TAGS: ${{ needs.create-and-push-manifest.outputs.PUSH_TAGS }}
     steps:
       - name: Print ENV Variables
         run: |
