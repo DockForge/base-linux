@@ -108,6 +108,9 @@ jobs:
   create-and-push-manifest:
     needs: build-and-push
     runs-on: ubuntu-latest
+    outputs:
+        PUSH_TAGS: ${{ steps.generate_push_tags.outputs.PUSH_TAGS }}
+        TAGS: ${{ steps.fetch-tags.outputs.TAGS }}
     env:
         SHA_SHORT: ${{ needs.build-and-push.outputs.SHA_SHORT }}
         BRANCH_NAME: ${{ needs.build-and-push.outputs.BRANCH_NAME }}
@@ -137,6 +140,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Generate Push Tags
+        id: generate_push_tags
         run: |
           PUSH_TAGS="${{ env.BaseOS }}-${{ env.SHA_SHORT }},"
           # PUSH_TAGS+="${{ env.BaseOS }}-${GITHUB_REF_NAME},"
