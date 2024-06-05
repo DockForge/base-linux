@@ -299,27 +299,33 @@ jobs:
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
     
-      - name: Pull and Create Multi-arch Image
+      - name: Setup Variables
         run: |
           TAGS=${{ env.TAGS }}
           PUSH_TAGS=${{ env.PUSH_TAGS }}
           IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
           IFS=',' read -r -a PUSH_TAG_ARRAY <<< "$PUSH_TAGS"
           FULL_IMAGE_NAME="ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}"
-          
-          # Create the multi-arch image using buildx
-          BUILDX_CMD="docker buildx build --push --platform linux/amd64,linux/arm64"
+          echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_ENV
+
+      - name: Pull Existing Images
+        run: |
           for TAG in "${TAG_ARRAY[@]}"; do
-            ARCH=$(echo "$TAG" | sed -e 's/.*-//') # Extract the architecture from the tag
-            BUILDX_CMD+=" --tag $FULL_IMAGE_NAME:$TAG"
             docker pull ${{ env.Repository }}:$TAG
             docker tag ${{ env.Repository }}:$TAG $FULL_IMAGE_NAME:$TAG
           done
           
-          # Append the target tags for the multi-arch image
+      - name: Prepare Build Command
+        run: |
+          BUILDX_CMD="docker buildx build --push --platform linux/amd64,linux/arm64"
+          for TAG in "${TAG_ARRAY[@]}"; do
+            ARCH=$(echo "$TAG" | sed -e 's/.*-//') # Extract the architecture from the tag
+            BUILDX_CMD+=" --tag $FULL_IMAGE_NAME:$TAG"
+          done
           for PUSH_TAG in "${PUSH_TAG_ARRAY[@]}"; do
             BUILDX_CMD+=" --tag $FULL_IMAGE_NAME:$PUSH_TAG"
           done
+          echo "BUILDX_CMD=$BUILDX_CMD" >> $GITHUB_ENV
           
-          # Build and push the multi-arch image
-          eval $BUILDX_CMD
+      - name: Build and Push Multi-Arch Image
+        run: eval $BUILDX_CMD
