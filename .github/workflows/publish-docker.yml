@@ -262,6 +262,11 @@ jobs:
           echo "SHA_SHORT: ${{ env.SHA_SHORT }}"
           echo "BRANCH_NAME: ${{ env.BRANCH_NAME }}"
           echo "GITHUB_REF_NAME: ${GITHUB_REF_NAME}"
+          echo "TAGS: ${{ env.TAGS }}"
+          echo "PUSH_TAGS: ${{ env.PUSH_TAGS }}"
+          echo "REPOSITORY: ${{ env.Repository }}"
+          echo "GITHUB_REPOSITORY: ${{ github.repository }}"
+          echo "GITHUB_EVENT_REPOSITORY_NAME: ${{ github.event.repository.name }}"
   
       - name: Log in to GitHub Packages
         uses: docker/login-action@v3
