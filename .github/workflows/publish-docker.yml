@@ -254,8 +254,8 @@ jobs:
     needs: [build-and-push, create-and-push-manifest]
     runs-on: ubuntu-latest
     env:
-        SHA_SHORT: ${{ needs.create-and-push-manifest.outputs.SHA_SHORT }}
-        BRANCH_NAME: ${{ needs.create-and-push-manifest.outputs.BRANCH_NAME }}
+        SHA_SHORT: ${{ needs.build-and-push.outputs.SHA_SHORT }}
+        BRANCH_NAME: ${{ needs.build-and-push.outputs.BRANCH_NAME }}
     steps:
       - name: Print ENV Variables
         run: |
