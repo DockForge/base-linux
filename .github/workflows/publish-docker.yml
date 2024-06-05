@@ -20,7 +20,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     outputs:
-        SHA_SHORT: ${{ steps.fetch-sha.outputs.SHA_SHORT }}
+        SHA_SHORT: ${{ steps.fetch-sha.outputs.SHA_SHORT }}${{ steps.set_output.outputs.value }}
         BRANCH_NAME: ${{ steps.extract-branch-name.outputs.BRANCH_NAME }}
     strategy:
       matrix:
@@ -251,7 +251,7 @@ jobs:
           sbom_file_name: "[TAG]"
 
   push-github-packages:
-    needs: create-and-push-manifest
+    needs: [build-and-push, create-and-push-manifest]
     runs-on: ubuntu-latest
     env:
         SHA_SHORT: ${{ needs.create-and-push-manifest.outputs.SHA_SHORT }}
