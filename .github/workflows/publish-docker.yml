@@ -306,12 +306,16 @@ jobs:
           IFS=',' read -r -a TAG_ARRAY <<< "$TAGS"
           IFS=',' read -r -a PUSH_TAG_ARRAY <<< "$PUSH_TAGS"
           FULL_IMAGE_NAME="ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}"
+          echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME >> $GITHUB_ENV"
           echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_ENV
+          echo "FULL_IMAGE_NAME=$FULL_IMAGE_NAME" >> $GITHUB_OUTPUT
 
       - name: Pull Existing Images
         run: |
           for TAG in "${TAG_ARRAY[@]}"; do
+            echo "Pulling ${{ env.Repository }}:$TAG"
             docker pull ${{ env.Repository }}:$TAG
+            echo "Tagging ${{ env.Repository }}:$TAG as $FULL_IMAGE_NAME:$TAG"
             docker tag ${{ env.Repository }}:$TAG $FULL_IMAGE_NAME:$TAG
           done
           
@@ -325,7 +329,10 @@ jobs:
           for PUSH_TAG in "${PUSH_TAG_ARRAY[@]}"; do
             BUILDX_CMD+=" --tag $FULL_IMAGE_NAME:$PUSH_TAG"
           done
+
+          echo "BUILDX_CMD=$BUILDX_CMD >> $GITHUB_ENV"
           echo "BUILDX_CMD=$BUILDX_CMD" >> $GITHUB_ENV
+          echo "BUILDX_CMD=$BUILDX_CMD" >> $GITHUB_OUTPUT
           
       - name: Build and Push Multi-Arch Image
         run: eval $BUILDX_CMD
