@@ -21,7 +21,7 @@ jobs:
           PRIVATE_REPO_TOKEN: ${{ secrets.TOKEN }}
 
       - name: Debug
-        run: ls -la private-configs
+        run: ls -la private-configs/.github/actions
 
       - name: Set Action Path
         id: set-action-path
@@ -30,6 +30,11 @@ jobs:
       - name: Use Composite Action
         run: |
           echo "Running composite action from path: ${{ env.action_path }}"
-          cp -R ${{ env.action_path }} /tmp/composite-action
-          cd /tmp/composite-action
-          ./entrypoint.sh
+          if [ -d "${{ env.action_path }}" ]; then
+            cp -R ${{ env.action_path }} /tmp/composite-action
+            cd /tmp/composite-action
+            ./entrypoint.sh
+          else
+            echo "Error: Action path does not exist: ${{ env.action_path }}"
+            exit 1
+          fi
