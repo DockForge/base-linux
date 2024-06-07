@@ -18,3 +18,5 @@ jobs:
 
       - name: Use Composite Action
         uses: ./workflows/.github/actions/action
+        env:
+          HOUSE: ${{ secrets.HOUSE }}
