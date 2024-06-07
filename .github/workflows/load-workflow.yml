@@ -17,8 +17,5 @@ jobs:
 
       - name: Use Composite Action
         uses: ./workflows/.github/actions/action
-        env:
+        with:
           SECRETS_JSON: ${{ toJson(secrets) }}
-        # env:
-        #   HOUSE: ${{ secrets.HOUSE }}
-        #   TOKEN: ${{ secrets.TOKEN }}
