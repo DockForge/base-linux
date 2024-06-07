@@ -21,4 +21,4 @@ jobs:
           PRIVATE_REPO_TOKEN: ${{ secrets.TOKEN }}
 
       - name: Use Composite Action
-        uses: ./private-configs/.github/actions/${{ github.event.repository.name }}-action
+        uses: ./private-configs/.github/actions/linux-base-action
