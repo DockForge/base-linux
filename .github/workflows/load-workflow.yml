@@ -1,9 +1,9 @@
-name: Load and Run Workflow
+name: Load and Run Composite Action
 
 on: [push, pull_request]
 
 jobs:
-  load-workflow:
+  load-and-run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -12,20 +12,13 @@ jobs:
       - name: Set up Git
         run: |
           git config --global url."https://${{ secrets.TOKEN }}@github.com".insteadOf "https://github.com"
+        env:
+          PRIVATE_REPO_TOKEN: ${{ secrets.TOKEN }}
 
       - name: Clone Private Configs
         run: git clone https://github.com/DublokSoftware/workflows.git private-configs
+        env:
+          PRIVATE_REPO_TOKEN: ${{ secrets.TOKEN }}
 
-      - name: Copy Workflow
-        run: cp private-configs/${{ github.event.repository.name }}-workflow.yml .github/workflows/loaded-workflow.yml
-
-      - name: Run the Loaded Workflow
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const fs = require('fs');
-            const yaml = require('js-yaml');
-            const path = '.github/workflows/loaded-workflow.yml';
-            const workflow = yaml.load(fs.readFileSync(path, 'utf8'));
-            console.log('Loaded Workflow:', workflow);
-            // Here you may need to run the workflow steps manually
+      - name: Use Composite Action
+        uses: ./private-configs/.github/actions/${{ github.event.repository.name }}-action
