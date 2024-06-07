@@ -15,6 +15,9 @@ jobs:
         env:
           PRIVATE_REPO_URL: https://github.com/DublokSoftware/workflows.git
 
+      - name: Print Private Repo URL
+        run: echo ${{ env.PRIVATE_REPO_URL }}
+
       - name: Clone Private Configs
         run: git clone ${{ env.PRIVATE_REPO_URL }} private-configs
 
@@ -29,4 +32,5 @@ jobs:
             const yaml = require('js-yaml');
             const path = '.github/workflows/loaded-workflow.yml';
             const workflow = yaml.load(fs.readFileSync(path, 'utf8'));
-            return workflow.jobs;
+            console.log('Loaded Workflow:', workflow);
+            // Here you may need to run the workflow steps manually
