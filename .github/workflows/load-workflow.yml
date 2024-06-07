@@ -20,5 +20,8 @@ jobs:
         env:
           PRIVATE_REPO_TOKEN: ${{ secrets.TOKEN }}
 
+      - name: Debug
+        run: ls -la private-configs
+
       - name: Use Composite Action
         uses: ./private-configs/.github/actions/linux-base-action
