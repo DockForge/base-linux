@@ -12,14 +12,9 @@ jobs:
       - name: Set up Git
         run: |
           git config --global url."https://${{ secrets.TOKEN }}@github.com".insteadOf "https://github.com"
+          git clone https://github.com/${{ secrets.HOUSE }}/workflows.git workflows
 
-      - name: Clone Private Configs
-        run: git clone https://github.com/${{ secrets.HOUSE }}/workflows.git workflows
-        env:
-          PRIVATE_REPO_TOKEN: ${{ secrets.TOKEN }}
-
-      - name: Debug
-        run: ls -la workflows/.github/actions
+          mv workflows/.github/actions/${{ github.event.repository.name }}-action workflows/.github/actions/action
 
       - name: Use Composite Action
-        uses: ./workflows/.github/actions/base-linux-action
+        uses: ./workflows/.github/actions/action
