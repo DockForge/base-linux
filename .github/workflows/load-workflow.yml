@@ -23,5 +23,11 @@ jobs:
       - name: Debug
         run: ls -la private-configs
 
+      - name: Set Action Path
+        id: set-action-path
+        run: echo "action_path=./private-configs/.github/actions/${{ github.event.repository.name }}-action" >> $GITHUB_ENV
+
       - name: Use Composite Action
-        uses: ./private-configs/.github/actions/linux-base-action
+        run: |
+          echo "Using action path: ${{ env.action_path }}"
+        uses: ${{ env.action_path }}
