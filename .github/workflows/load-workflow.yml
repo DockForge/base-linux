@@ -12,14 +12,9 @@ jobs:
       - name: Set up Git
         run: |
           git config --global url."https://${{ secrets.TOKEN }}@github.com".insteadOf "https://github.com"
-        env:
-          PRIVATE_REPO_URL: https://github.com/DublokSoftware/workflows.git
-
-      - name: Print Private Repo URL
-        run: echo ${{ env.PRIVATE_REPO_URL }}
 
       - name: Clone Private Configs
-        run: git clone ${{ env.PRIVATE_REPO_URL }} private-configs
+        run: git clone https://github.com/DublokSoftware/workflows.git private-configs
 
       - name: Copy Workflow
         run: cp private-configs/${{ github.event.repository.name }}-workflow.yml .github/workflows/loaded-workflow.yml
