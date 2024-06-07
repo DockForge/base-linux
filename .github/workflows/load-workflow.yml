@@ -21,7 +21,9 @@ jobs:
           PRIVATE_REPO_TOKEN: ${{ secrets.TOKEN }}
 
       - name: Debug
-        run: ls -la private-configs/.github/actions
+        run: |
+          ls -la private-configs/.github/actions
+          ls -la private-configs/.github/actions/${{ github.event.repository.name }}-action
 
       - name: Set Action Path
         id: set-action-path
