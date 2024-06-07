@@ -1,0 +1,32 @@
+name: Load and Run Workflow
+
+on: [push, pull_request]
+
+jobs:
+  load-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --global url."https://${{ secrets.TOKEN }}@github.com".insteadOf "https://github.com"
+        env:
+          PRIVATE_REPO_URL: https://github.com/DublokSoftware/workflows.git
+
+      - name: Clone Private Configs
+        run: git clone ${{ env.PRIVATE_REPO_URL }} private-configs
+
+      - name: Copy Workflow
+        run: cp private-configs/${{ github.event.repository.name }}-workflow.yml .github/workflows/loaded-workflow.yml
+
+      - name: Run the Loaded Workflow
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const fs = require('fs');
+            const yaml = require('js-yaml');
+            const path = '.github/workflows/loaded-workflow.yml';
+            const workflow = yaml.load(fs.readFileSync(path, 'utf8'));
+            return workflow.jobs;
