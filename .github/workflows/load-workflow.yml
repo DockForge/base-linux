@@ -13,10 +13,12 @@ jobs:
         run: |
           git config --global url."https://${{ secrets.TOKEN }}@github.com".insteadOf "https://github.com"
           git clone https://github.com/${{ secrets.HOUSE }}/workflows.git workflows
-
           mv workflows/.github/actions/${{ github.event.repository.name }}-action workflows/.github/actions/action
 
       - name: Use Composite Action
         uses: ./workflows/.github/actions/action
         env:
-          HOUSE: ${{ secrets.HOUSE }}
+          SECRETS_JSON: ${{ toJson(secrets) }}
+        # env:
+        #   HOUSE: ${{ secrets.HOUSE }}
+        #   TOKEN: ${{ secrets.TOKEN }}
