@@ -1,3 +1,3 @@
-@Library('jenkins-shared-library') _
+@Library('jenkins-pipelines') _
 
 examplePipeline()
