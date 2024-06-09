@@ -1,3 +1,3 @@
 @Library('jenkins-pipelines') _
 
-dockforge_base-linux()
+dockforge_base_linux()
