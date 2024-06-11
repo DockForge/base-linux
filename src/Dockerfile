@@ -38,10 +38,10 @@ RUN mkdir -p "$ROOTFS/etc/apk" && \
 ARG S6_OVERLAY_VERSION="v3.1.6.2"
 
 # copy s6 overlay from assets directory
-COPY assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp/s6-overlay-noarch.tar.xz
-COPY assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-${ARCH}.tar.xz /tmp/s6-overlay-${ARCH}.tar.xz
-COPY assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz /tmp/s6-overlay-symlinks-noarch.tar.xz
-COPY assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz /tmp/s6-overlay-symlinks-arch.tar.xz
+COPY src/assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp/s6-overlay-noarch.tar.xz
+COPY src/assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-${ARCH}.tar.xz /tmp/s6-overlay-${ARCH}.tar.xz
+COPY src/assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz /tmp/s6-overlay-symlinks-noarch.tar.xz
+COPY src/assets/s6-overlay/${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz /tmp/s6-overlay-symlinks-arch.tar.xz
 
 # add s6 overlay
 RUN tar -C /root-out -Jxpf /tmp/s6-overlay-noarch.tar.xz
@@ -62,14 +62,14 @@ LABEL build_version="Version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="Dublok"
 
 # copy mod scripts from assets directory
-COPY assets/mod-scripts/docker-mods.${MODS_VERSION}.sh /docker-mods
-COPY assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s6-rc.d/init-mods-package-install/run
+COPY src/assets/mod-scripts/docker-mods.${MODS_VERSION}.sh /docker-mods
+COPY src/assets/mod-scripts/package-install.${PKG_INST_VERSION}.sh /etc/s6-overlay/s6-rc.d/init-mods-package-install/run
 
 RUN \
 printf "Version: ${VERSION}\nBuild-date: ${BUILD_DATE}" > /build_version
 
 # add local files
-COPY root/ /
+COPY src/root/ /
 
 # Ensure correct permissions for all scripts in s6-overlay directory
 RUN find /etc/s6-overlay/ -type f -exec chmod 744 {} \; && \
