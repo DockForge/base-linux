@@ -60,6 +60,7 @@ ARG MODS_VERSION="v3"
 ARG PKG_INST_VERSION="v1"
 LABEL build_version="Version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="Dublok"
+LABEL org.opencontainers.image.source https://github.com/DockForge/base-linux
 
 # copy mod scripts from assets directory
 COPY src/assets/mod-scripts/docker-mods.${MODS_VERSION}.sh /docker-mods
