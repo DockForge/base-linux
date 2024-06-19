@@ -102,4 +102,3 @@ These dependencies are crucial for the smooth operation and functionality of the
 ## License
 
 This project is licensed under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007. See the [LICENSE](LICENSE) file for more details.
-
