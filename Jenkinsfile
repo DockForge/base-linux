@@ -1,3 +1,3 @@
 @Library('jenkins-pipelines') _
 
-dockforge_base_linux()
+generic_image_generator(BASE_OS: 'alpine')
